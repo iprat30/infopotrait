@@ -1,0 +1,236 @@
+import React, { useState, useMemo } from 'react';
+import { X, Calendar, MapPin, MessageCircle, Clock, Check, Info } from 'lucide-react';
+import { BRANCHES_DATA, MAIN_WHATSAPP } from '../data/branchesData';
+
+export default function BookingModal({ packageItem, onClose }) {
+  const [selectedBranchId, setSelectedBranchId] = useState('bq-square');
+  const [date, setDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('10:00 WIB');
+  const [totalPeople, setTotalPeople] = useState('');
+  const [notes, setNotes] = useState('');
+
+  if (!packageItem) return null;
+
+  const currentBranch = BRANCHES_DATA.find((b) => b.id === selectedBranchId) || BRANCHES_DATA[0];
+
+  // Dynamic available time slots based on branch & day of week
+  const availableTimeSlots = useMemo(() => {
+    let closingHour = 20; // Default 20.00 WIB
+
+    if (selectedBranchId === 'sekaran') {
+      if (date) {
+        const day = new Date(date).getDay(); // 0 is Sun, 6 is Sat
+        const isWeekend = day === 0 || day === 6;
+        closingHour = isWeekend ? 20 : 17; // Mon-Fri closes at 17.00
+      } else {
+        closingHour = 17; // Default to weekday hours for safety
+      }
+    }
+
+    const slots = [];
+    for (let h = 9; h < closingHour; h++) {
+      const hourStr = h < 10 ? `0${h}` : `${h}`;
+      slots.push(`${hourStr}:00 WIB`);
+      if (h + 0.5 < closingHour) {
+        slots.push(`${hourStr}:30 WIB`);
+      }
+    }
+    return slots;
+  }, [selectedBranchId, date]);
+
+  const handleSendWa = (e) => {
+    e.preventDefault();
+
+    const text = [
+      `*FORM BOOKING POTRAIT STUDIO SEMARANG*`,
+      `Paket: ${packageItem.name} (${packageItem.price}${packageItem.priceSuffix || ''})`,
+      `Cabang: ${currentBranch.name}`,
+      date ? `Rencana Tanggal: ${date}` : `Tanggal: (Menyesuaikan)`,
+      `Jam yang Diinginkan: ${selectedTime}`,
+      totalPeople ? `Jumlah Orang: ${totalPeople}` : null,
+      notes ? `Catatan Tambahan: ${notes}` : null,
+      ``,
+      `Halo admin, apakah jadwal sesi foto pada jam tersebut masih tersedia? Terima kasih.`
+    ].filter(Boolean).join('\n');
+
+    const url = `https://wa.me/${MAIN_WHATSAPP.number}?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div 
+        className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 md:p-6 shadow-floating border border-warm-200 max-h-[92vh] overflow-y-auto"
+      >
+        {/* Modal Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-warm-100">
+          <div>
+            <span className="text-[10px] uppercase tracking-wider font-bold text-warm-800">
+              Form Reservasi Jadwal Sesi Foto
+            </span>
+            <h3 id="modal-title" className="text-base md:text-lg font-extrabold text-charcoal">
+              {packageItem.name}
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="size-8 rounded-full bg-warm-100 text-charcoal flex items-center justify-center hover:bg-warm-200 transition-colors"
+            aria-label="Tutup form booking"
+          >
+            <X className="size-4" aria-hidden="true" />
+          </button>
+        </div>
+
+        {/* Selected Package Summary Box */}
+        <div className="mt-3 p-3 bg-warm-50 rounded-xl border border-warm-200 flex items-center justify-between">
+          <div>
+            <p className="text-xs text-charcoal-700 font-semibold">Harga Paket:</p>
+            <p className="text-lg font-black text-charcoal">{packageItem.price}</p>
+          </div>
+          <div className="text-right text-[11px] text-charcoal-700">
+            <p>⏱ {packageItem.duration}</p>
+            <p>👥 {packageItem.capacity || packageItem.people}</p>
+          </div>
+        </div>
+
+        {/* Form Inputs */}
+        <form onSubmit={handleSendWa} className="mt-3.5 space-y-3.5">
+          
+          {/* 1. Branch Picker */}
+          <div>
+            <label className="block text-xs font-bold text-charcoal mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1">
+                <MapPin className="size-3.5 text-warm-800" aria-hidden="true" />
+                <span>Pilih Cabang Studio:</span>
+              </span>
+              <span className="text-[10px] text-emerald-700 font-bold">{currentBranch.hours}</span>
+            </label>
+            <div className="grid grid-cols-1 gap-1.5">
+              {BRANCHES_DATA.map((b) => (
+                <button
+                  type="button"
+                  key={b.id}
+                  onClick={() => setSelectedBranchId(b.id)}
+                  className={`tap-bounce flex items-center justify-between p-2.5 rounded-xl border text-xs text-left transition-all ${
+                    selectedBranchId === b.id
+                      ? 'border-charcoal bg-charcoal text-white font-bold'
+                      : 'border-warm-200 bg-white text-charcoal hover:bg-warm-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-emerald-400"></span>
+                    <span>{b.name}</span>
+                  </div>
+                  <span className={`text-[10px] ${selectedBranchId === b.id ? 'text-warm-200' : 'text-charcoal-700'}`}>
+                    {b.badge}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 2. Date Picker */}
+          <div>
+            <label htmlFor="booking-date" className="block text-xs font-bold text-charcoal mb-1 flex items-center gap-1">
+              <Calendar className="size-3.5 text-warm-800" aria-hidden="true" />
+              <span>Rencana Tanggal Sesi Foto:</span>
+            </label>
+            <input
+              id="booking-date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-charcoal/20"
+            />
+          </div>
+
+          {/* 3. DYNAMIC TIME SLOTS ACCORDING TO BRANCH HOURS */}
+          <div>
+            <label className="block text-xs font-bold text-charcoal mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1">
+                <Clock className="size-3.5 text-warm-800" aria-hidden="true" />
+                <span>Pilih Jam Sesi ({currentBranch.name}):</span>
+              </span>
+              <span className="text-[10px] text-charcoal-700">Interval 30 menit</span>
+            </label>
+
+            {/* Time Slot Chips Grid */}
+            <div className="grid grid-cols-4 gap-1.5 max-h-36 overflow-y-auto p-1 bg-warm-50 rounded-xl border border-warm-200">
+              {availableTimeSlots.map((slot, sIdx) => {
+                const isSelected = selectedTime === slot;
+                return (
+                  <button
+                    type="button"
+                    key={sIdx}
+                    onClick={() => setSelectedTime(slot)}
+                    className={`py-1.5 px-1 rounded-lg text-[11px] font-bold text-center transition-all ${
+                      isSelected
+                        ? 'bg-charcoal text-white shadow-xs'
+                        : 'bg-white text-charcoal border border-warm-200 hover:bg-warm-100'
+                    }`}
+                  >
+                    {slot.replace(' WIB', '')}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[10px] text-charcoal-700 mt-1">
+              Jam terpilih: <strong className="text-charcoal">{selectedTime}</strong> (sesuai jam operasional {currentBranch.name})
+            </p>
+          </div>
+
+          {/* 4. People Count & Notes */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label htmlFor="booking-people" className="block text-[11px] font-bold text-charcoal mb-1">
+                Estimasi Jumlah Orang:
+              </label>
+              <input
+                id="booking-people"
+                type="text"
+                placeholder="misal: 4 orang"
+                value={totalPeople}
+                onChange={(e) => setTotalPeople(e.target.value)}
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-charcoal/20"
+              />
+            </div>
+            <div>
+              <label htmlFor="booking-notes" className="block text-[11px] font-bold text-charcoal mb-1">
+                Catatan / Request Khusus:
+              </label>
+              <input
+                id="booking-notes"
+                type="text"
+                placeholder="misal: wisuda UNDIP, bawa toga"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-charcoal/20"
+              />
+            </div>
+          </div>
+
+          {/* Submit WhatsApp Button */}
+          <div className="pt-2">
+            <button
+              type="submit"
+              className="tap-bounce w-full flex items-center justify-center gap-2 bg-wa hover:bg-wa-hover text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors min-h-[46px] text-xs md:text-sm"
+            >
+              <MessageCircle className="size-4 shrink-0" aria-hidden="true" />
+              <span>Konfirmasi Jadwal via WhatsApp</span>
+            </button>
+            <p className="text-[10px] text-center text-charcoal-700 mt-1.5">
+              Pesan pra-isi akan otomatis memuat paket, cabang, tanggal, dan jam pilihan Anda.
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
