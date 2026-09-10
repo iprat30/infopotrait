@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import Header from './components/Header';
 import NavigationSwitcher from './components/NavigationSwitcher';
 import CompactPromo from './components/CompactPromo';
@@ -170,6 +171,9 @@ export default function App() {
           onClose={() => setBookingPackage(null)}
         />
       )}
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
     </div>
   );
 }
