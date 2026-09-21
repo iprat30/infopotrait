@@ -20,6 +20,19 @@ export default function BranchLocator() {
         </p>
       </div>
 
+      {/* Notice Callout for Self Photo Availability */}
+      <div className="mb-5 p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/80 shadow-xs flex items-start gap-2.5">
+        <Sparkles className="size-4 text-amber-600 shrink-0 mt-0.5" aria-hidden="true" />
+        <div className="text-xs text-charcoal">
+          <p className="font-bold text-amber-950">
+            Informasi Layanan Self Photo Studio:
+          </p>
+          <p className="text-charcoal-700 mt-0.5 leading-relaxed">
+            Layanan <strong>Self Photo Studio</strong> saat ini khusus tersedia di <strong>Cabang Prof. Soedarto (Tembalang)</strong> dan <strong>Cabang Sekaran (UNNES)</strong>. Cabang BQ Square khusus melayani foto studio bersama fotografer (Wisuda, Family, Pas Foto, & Frame).
+          </p>
+        </div>
+      </div>
+
       {/* Branches List */}
       <div className="space-y-4">
         {BRANCHES_DATA.map((branch) => {
@@ -33,9 +46,20 @@ export default function BranchLocator() {
               {/* Branch Title & Badge */}
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <span className="inline-block bg-warm-100 text-warm-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md mb-1.5">
-                    {branch.badge}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
+                    <span className="inline-block bg-warm-100 text-warm-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md">
+                      {branch.badge}
+                    </span>
+                    {branch.hasSelfPhoto ? (
+                      <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[10.5px] font-bold px-2 py-0.5 rounded-md border border-emerald-200">
+                        📸 Tersedia Self Photo
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 bg-warm-100/70 text-charcoal-600 text-[10px] font-medium px-2 py-0.5 rounded-md border border-warm-200">
+                        Hanya Studio Fotografer
+                      </span>
+                    )}
+                  </div>
                   <h3 className="text-base font-bold text-charcoal">
                     {branch.name}
                   </h3>

@@ -8,7 +8,8 @@ export const BRANCHES_DATA = [
     phone: "+6285866926297",
     whatsappNumber: "6285866926297",
     mapsUrl: "https://maps.google.com/?q=Potrait+BQ+Square+Tembalang+Semarang",
-    features: ["Studio Foto Digital", "Self Photo Studio", "Ruang Ganti Nyaman", "Parkir Luas"]
+    hasSelfPhoto: false,
+    features: ["Studio Foto Fotografer", "Wisuda & Family Studio", "Pas Foto Kilat", "Ruang Ganti Nyaman", "Parkir Luas"]
   },
   {
     id: "prof-soedarto",
@@ -19,7 +20,8 @@ export const BRANCHES_DATA = [
     phone: "+6285101223397",
     whatsappNumber: "6285101223397",
     mapsUrl: "https://maps.google.com/?q=Potrait+Studio+Prof+Soedarto+Tembalang+Semarang",
-    features: ["Studio Utama & Wisuda", "Spot Foto Klasik & Modern", "AC Dingin", "Akses Mudah"]
+    hasSelfPhoto: true,
+    features: ["Tersedia Self Photo Studio", "Studio Wisuda & Family", "Spot Foto Klasik & Modern", "AC Dingin", "Akses Mudah"]
   },
   {
     id: "sekaran",
@@ -30,7 +32,8 @@ export const BRANCHES_DATA = [
     phone: "+6285600800697",
     whatsappNumber: "6285600800697",
     mapsUrl: "https://maps.google.com/?q=Potrait+Studio+Sekaran+Gunungpati+UNNES",
-    features: ["Self Photo Box", "Paket Wisuda & Group", "Dekat Kampus UNNES", "Layanan Kilat"]
+    hasSelfPhoto: true,
+    features: ["Tersedia Self Photo Studio", "Self Photo Box Privat", "Paket Wisuda & Group", "Dekat Kampus UNNES", "Layanan Kilat"]
   }
 ];
 

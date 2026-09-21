@@ -396,7 +396,7 @@ export const PACKAGES_DATA = {
   // 4. SELF PHOTO
   selfi: {
     categoryTitle: "Potrait Self Photo Studio",
-    description: "Foto bebas tanpa fotografer menggunakan remote shutter nirkabel di studio privat ber-AC",
+    description: "Foto bebas tanpa fotografer menggunakan remote shutter nirkabel di studio privat ber-AC. (Khusus tersedia di Cabang Prof. Soedarto Tembalang & Cabang Sekaran UNNES)",
     items: [
       {
         id: "selfi-maximal",
@@ -709,6 +709,10 @@ export const FAQS = [
   {
     question: "Di mana saja 3 cabang Potrait Studio di Semarang?",
     answer: "Cabang kami berada di: (1) Ruko BQ Square Tembalang (dekat UNDIP), (2) Ruko Dahlia Jl. Prof. Soedarto Tembalang, dan (3) Jl. Taman Siswa Sekaran Gunungpati (dekat UNNES)."
+  },
+  {
+    question: "Apakah semua cabang menyediakan layanan Self Photo Studio?",
+    answer: "Tidak. Layanan Self Photo Studio HANYA tersedia di 2 cabang kami: Potrait Prof. Soedarto (Tembalang) dan Potrait Sekaran (UNNES Gunungpati). Cabang BQ Square khusus melayani foto studio bersama fotografer profesional (Wisuda, Family, Pas Foto, & Cetak Frame)."
   },
   {
     question: "Apakah boleh membawa pakaian / outfit ganti dan properti sendiri?",

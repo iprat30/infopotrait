@@ -5,7 +5,8 @@ import { BRANCHES_DATA, MAIN_WHATSAPP } from '../data/branchesData';
 export default function BookingModal({ packageItem, onClose }) {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [selectedBranchId, setSelectedBranchId] = useState('bq-square');
+  const isSelfPhoto = packageItem?.id?.startsWith('selfi') || packageItem?.name?.toLowerCase().includes('self photo');
+  const [selectedBranchId, setSelectedBranchId] = useState(isSelfPhoto ? 'prof-soedarto' : 'bq-square');
   const [date, setDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('10:00 WIB');
   const [totalPeople, setTotalPeople] = useState('');
@@ -13,7 +14,7 @@ export default function BookingModal({ packageItem, onClose }) {
 
   if (!packageItem) return null;
 
-  const currentBranch = BRANCHES_DATA.find((b) => b.id === selectedBranchId) || BRANCHES_DATA[0];
+  const currentBranch = BRANCHES_DATA.find((b) => b.id === selectedBranchId) || (isSelfPhoto ? BRANCHES_DATA[1] : BRANCHES_DATA[0]);
 
   // Dynamic available time slots based on branch & day of week
   const availableTimeSlots = useMemo(() => {
@@ -153,27 +154,43 @@ export default function BookingModal({ packageItem, onClose }) {
               </span>
               <span className="text-[10px] text-emerald-700 font-bold">{currentBranch.hours}</span>
             </label>
+
+            {isSelfPhoto && (
+              <div className="mb-2 p-2 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-950 flex items-center gap-1.5">
+                <Info className="size-3.5 text-amber-600 shrink-0" />
+                <span>Layanan Self Photo khusus tersedia di <strong>Cabang Prof. Soedarto</strong> & <strong>Cabang Sekaran</strong>.</span>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 gap-1.5">
-              {BRANCHES_DATA.map((b) => (
-                <button
-                  type="button"
-                  key={b.id}
-                  onClick={() => setSelectedBranchId(b.id)}
-                  className={`tap-bounce flex items-center justify-between p-2.5 rounded-xl border text-xs text-left transition-all ${
-                    selectedBranchId === b.id
-                      ? 'border-charcoal bg-charcoal text-white font-bold'
-                      : 'border-warm-200 bg-white text-charcoal hover:bg-warm-50'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-emerald-400"></span>
-                    <span>{b.name}</span>
-                  </div>
-                  <span className={`text-[10px] ${selectedBranchId === b.id ? 'text-warm-200' : 'text-charcoal-700'}`}>
-                    {b.badge}
-                  </span>
-                </button>
-              ))}
+              {BRANCHES_DATA.map((b) => {
+                const isUnavailableForSelf = isSelfPhoto && !b.hasSelfPhoto;
+                const isSelected = selectedBranchId === b.id;
+
+                return (
+                  <button
+                    type="button"
+                    key={b.id}
+                    disabled={isUnavailableForSelf}
+                    onClick={() => setSelectedBranchId(b.id)}
+                    className={`tap-bounce flex items-center justify-between p-2.5 rounded-xl border text-xs text-left transition-all ${
+                      isUnavailableForSelf
+                        ? 'opacity-45 bg-warm-100/70 border-warm-200 text-charcoal-400 cursor-not-allowed'
+                        : isSelected
+                        ? 'border-charcoal bg-charcoal text-white font-bold'
+                        : 'border-warm-200 bg-white text-charcoal hover:bg-warm-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`size-2 rounded-full ${isUnavailableForSelf ? 'bg-gray-300' : 'bg-emerald-400'}`}></span>
+                      <span>{b.name}</span>
+                    </div>
+                    <span className={`text-[10px] ${isUnavailableForSelf ? 'text-red-500 font-semibold' : isSelected ? 'text-warm-200' : 'text-charcoal-700'}`}>
+                      {isUnavailableForSelf ? 'Tidak Ada Self Photo' : isSelfPhoto && b.hasSelfPhoto ? 'Tersedia Self Photo ✓' : b.badge}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
