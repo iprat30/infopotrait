@@ -7,8 +7,8 @@ const FILTER_TAGS = [
   { id: 'wisuda-indoor', label: 'Wisuda Studio' },
   { id: 'wisuda-outdoor', label: 'Wisuda Outdoor' },
   { id: 'pasfoto', label: 'Pas Foto & ID' },
-  { id: 'selfi', label: 'Selfi Studio' },
-  { id: 'psn', label: 'Couple / PSN' },
+  { id: 'selfi', label: 'Self Photo' },
+  { id: 'psn', label: 'Couple' },
   { id: 'group', label: 'Group' },
   { id: 'frame-cetak', label: 'Frame & Cetak' },
 ];

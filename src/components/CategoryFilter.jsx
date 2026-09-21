@@ -22,7 +22,7 @@ export default function CategoryFilter({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Cari paket (misal: wisuda, selfi, couple, frame)..."
+            placeholder="Cari paket (misal: wisuda, self photo, couple, frame)..."
             className="w-full pl-9 pr-8 py-2.5 bg-white border border-warm-200 rounded-xl text-xs md:text-sm text-charcoal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-charcoal/20 focus:border-charcoal transition-all shadow-soft"
             aria-label="Cari paket foto"
           />

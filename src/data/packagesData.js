@@ -9,8 +9,8 @@ export const CATEGORIES = [
   { id: "wisuda-indoor", label: "Wisuda Indoor", isHot: true },
   { id: "wisuda-outdoor", label: "Wisuda Outdoor", isHot: false },
   { id: "pasfoto", label: "Pas Foto & ID", isHot: true },
-  { id: "selfi", label: "Selfi Studio", isHot: true },
-  { id: "psn", label: "Couple & PSN", isHot: false },
+  { id: "selfi", label: "Self Photo", isHot: true },
+  { id: "psn", label: "Couple", isHot: false },
   { id: "group", label: "Group & Friendship", isHot: false },
   { id: "frame-cetak", label: "Frame & Cetak", isHot: false },
 ];
@@ -69,14 +69,14 @@ export const PORTFOLIO_ITEMS = [
   {
     id: "port-5",
     category: "psn",
-    title: "Couple & Pre-Wedding PSN",
+    title: "Couple Studio Photo",
     location: "Sesi Hangat Berdua",
     image: "/rifa-r-8952-1944x1296-800x533.jpg"
   },
   {
     id: "port-6",
     category: "selfi",
-    title: "Self Photo Studio Box",
+    title: "Self Photo Studio",
     location: "Bebas Bergaya Remote Shutter",
     image: "/lala-r-3996-2000x1333.jpg"
   },
@@ -378,14 +378,14 @@ export const PACKAGES_DATA = {
     ]
   },
 
-  // 4. SELFI STUDIO
+  // 4. SELF PHOTO
   selfi: {
-    categoryTitle: "Potrait Selfi Studio (Self Photo Box)",
-    description: "Foto bebas tanpa fotografer menggunakan remote shutter nirkabel di studio ber-AC",
+    categoryTitle: "Potrait Self Photo Studio",
+    description: "Foto bebas tanpa fotografer menggunakan remote shutter nirkabel di studio privat ber-AC",
     items: [
       {
         id: "selfi-maximal",
-        name: "Selfi Maximal (Hingga 8 Orang)",
+        name: "Self Photo Maximal (Hingga 8 Orang)",
         badge: "Paling Direkomendasikan",
         badgeType: "recommended",
         isPopular: true,
@@ -407,7 +407,7 @@ export const PACKAGES_DATA = {
       },
       {
         id: "selfi-standard",
-        name: "Selfi Standard (Hingga 4 Orang)",
+        name: "Self Photo Standard (Hingga 4 Orang)",
         badge: "Paling Laris",
         badgeType: "bestseller",
         isPopular: true,
@@ -429,7 +429,7 @@ export const PACKAGES_DATA = {
       },
       {
         id: "selfi-instan",
-        name: "Selfi Instan (5 Menit)",
+        name: "Self Photo Instan (5 Menit)",
         badge: "Kilat",
         badgeType: "default",
         isPopular: false,
@@ -457,14 +457,14 @@ export const PACKAGES_DATA = {
     ]
   },
 
-  // 5. COUPLE & PSN
+  // 5. COUPLE
   psn: {
-    categoryTitle: "Paket Pernikahan & Couple (PSN - Paket Siap Nikah)",
-    description: "Khusus pasangan untuk pra-nikah, buku nikah, engagement, atau anniversary",
+    categoryTitle: "Paket Couple Studio",
+    description: "Khusus pasangan untuk pra-nikah, buku nikah, engagement, anniversary, atau momen berdua",
     items: [
       {
         id: "psn-sayang",
-        name: "PSN: Sayang",
+        name: "Couple: Sayang",
         badge: "Paling Direkomendasikan",
         badgeType: "recommended",
         isPopular: true,
@@ -488,7 +488,7 @@ export const PACKAGES_DATA = {
       },
       {
         id: "psn-cinta",
-        name: "PSN: Cinta",
+        name: "Couple: Cinta",
         badge: "Paling Laris",
         badgeType: "bestseller",
         isPopular: false,
@@ -512,7 +512,7 @@ export const PACKAGES_DATA = {
       },
       {
         id: "psn-si-dia",
-        name: "PSN: Si Dia",
+        name: "Couple: Si Dia",
         badge: "Hemat",
         badgeType: "default",
         isPopular: false,
@@ -685,7 +685,7 @@ export const FAQS = [
   },
   {
     question: "Apakah bisa langsung datang (walk-in) tanpa booking?",
-    answer: "Bisa untuk Pas Foto dan Selfi Studio jika slot sedang kosong. Namun untuk Paket Wisuda, Couple/PSN, dan Group, kami sangat menyarankan reservasi terlebih dahulu agar jam pemotretan Anda terjamin."
+    answer: "Bisa untuk Pas Foto dan Self Photo jika slot sedang kosong. Namun untuk Paket Wisuda, Couple, dan Group, kami sangat menyarankan reservasi terlebih dahulu agar jam pemotretan Anda terjamin."
   },
   {
     question: "Kapan file softcopy dan hasil cetak selesai?",
