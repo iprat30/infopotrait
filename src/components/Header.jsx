@@ -21,29 +21,32 @@ function XIcon({ className }) {
 
 export default function Header() {
   return (
-    <header className="pt-4 pb-2 px-4 max-w-xl mx-auto text-center">
-      {/* Brand Typography Wordmark (Replacing image logo with attractive editorial font) */}
+    <header className="pt-5 pb-3 px-4 max-w-xl mx-auto text-center" aria-label="Potrait Studio Header">
+      {/* Brand Typography Wordmark */}
       <div className="flex flex-col items-center justify-center">
-        <div className="inline-block py-1">
-          <span className="font-black text-2xl md:text-3xl tracking-[0.22em] text-charcoal uppercase block">
+        <div className="relative inline-block py-0.5">
+          <h1 className="font-black text-2xl sm:text-3xl tracking-[0.24em] text-charcoal uppercase block leading-none">
             POTRAIT
-          </span>
-          <span className="text-[10px] md:text-[11px] font-bold tracking-[0.3em] uppercase text-warm-800 -mt-1 block">
+          </h1>
+          <p className="text-[10px] sm:text-[11px] font-extrabold tracking-[0.32em] uppercase text-warm-800 mt-1">
             Digital Studio & Self Photo
-          </span>
+          </p>
         </div>
 
         {/* Live Status Badge */}
-        <div className="flex items-center gap-1.5 mt-2 bg-white px-3 py-1 rounded-full border border-emerald-200 shadow-xs">
-          <span className="size-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></span>
+        <div className="inline-flex items-center gap-1.5 mt-2.5 bg-emerald-50/80 px-3 py-1 rounded-full border border-emerald-200/80 shadow-xs">
+          <span className="relative flex size-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
+          </span>
           <span className="text-[11px] font-bold text-emerald-800 tracking-tight">
-            Buka Hari Ini (09.00 - 20.00 WIB)
+            Buka Setiap Hari (09.00 – 20.00 WIB)
           </span>
         </div>
       </div>
 
       {/* Social Media Links Bar (@potraiters) */}
-      <div className="flex items-center justify-center gap-2 mt-2.5 flex-wrap">
+      <div className="flex items-center justify-center gap-1.5 mt-2.5 flex-wrap">
         <a
           href="https://instagram.com/potraiters"
           target="_blank"
@@ -89,13 +92,13 @@ export default function Header() {
         </a>
       </div>
 
-      {/* Campus Location Pills */}
-      <div className="flex items-center justify-center gap-2 mt-2 text-[11px] text-charcoal font-medium">
-        <span className="inline-flex items-center gap-1 bg-warm-100/80 px-2.5 py-0.5 rounded-full border border-warm-200">
+      {/* Campus Location Indicators */}
+      <div className="flex items-center justify-center gap-2 mt-2 text-[11px] text-charcoal-700 font-medium">
+        <span className="inline-flex items-center gap-1 bg-white/80 px-2.5 py-0.5 rounded-full border border-warm-200 shadow-2xs">
           <MapPin className="size-3 text-warm-800 shrink-0" aria-hidden="true" />
           <span>Tembalang (UNDIP)</span>
         </span>
-        <span className="inline-flex items-center gap-1 bg-warm-100/80 px-2.5 py-0.5 rounded-full border border-warm-200">
+        <span className="inline-flex items-center gap-1 bg-white/80 px-2.5 py-0.5 rounded-full border border-warm-200 shadow-2xs">
           <MapPin className="size-3 text-warm-800 shrink-0" aria-hidden="true" />
           <span>Sekaran (UNNES)</span>
         </span>

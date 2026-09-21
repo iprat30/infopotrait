@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from './components/Header';
 import NavigationSwitcher from './components/NavigationSwitcher';
+import PortfolioTicker from './components/PortfolioTicker';
 import CompactPromo from './components/CompactPromo';
 import CategoryTabs from './components/CategoryTabs';
 import PackageCard from './components/PackageCard';
@@ -34,6 +35,16 @@ export default function App() {
       {/* VIEW 1: PRICELIST (KARTU & KATEGORI TANPA FOTO, SIMPLE & TERLIHAT SEMUANYA) */}
       {activeTab === 'packages' && (
         <div className="flex-1 flex flex-col">
+          {/* Continuous Auto-Running Portfolio Ticker (Hooking visual portfolio right below header, above promo) */}
+          <PortfolioTicker
+            onSelectCategory={(catId) => {
+              if (catId && PACKAGES_DATA[catId]) {
+                setSelectedCategory(catId);
+                setShowAddOns(false);
+              }
+            }}
+          />
+
           {/* Compact Promo Banner */}
           <CompactPromo />
 

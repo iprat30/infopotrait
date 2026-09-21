@@ -69,3 +69,23 @@
 .animate-cta-pulse {
   animation: gentle-pulse 2.2s ease-in-out infinite;
 }
+
+/* Infinite Marquee Ticker for dynamic portfolio slide */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 24s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
