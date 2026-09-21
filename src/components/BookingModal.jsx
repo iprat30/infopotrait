@@ -6,10 +6,14 @@ export default function BookingModal({ packageItem, onClose }) {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const isSelfPhoto = packageItem?.id?.startsWith('selfi') || packageItem?.name?.toLowerCase().includes('self photo');
-  const isPasFoto = packageItem?.id?.startsWith('pasfoto') || packageItem?.name?.toLowerCase().includes('pas foto');
+  const isPasFoto = packageItem?.id?.startsWith('pasfoto') || packageItem?.id?.includes('pasfoto') || packageItem?.name?.toLowerCase().includes('pas foto');
+  const isPrintOnly = packageItem?.isPrintOnly || packageItem?.id === 'cetak-pasfoto-only';
+
   const [selectedBranchId, setSelectedBranchId] = useState(isSelfPhoto ? 'prof-soedarto' : 'bq-square');
   const [pasFotoSet, setPasFotoSet] = useState('Set A (4x6 = 4 lembar)');
   const [pasFotoColor, setPasFotoColor] = useState('Warna');
+  const [printSpeed, setPrintSpeed] = useState('Express 30 Menit (Rp 10.000 / set)');
+  const [quantity, setQuantity] = useState('1 Set');
   const [date, setDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('10:00 WIB');
   const [totalPeople, setTotalPeople] = useState('');
@@ -47,7 +51,21 @@ export default function BookingModal({ packageItem, onClose }) {
   const handleSendWa = (e) => {
     e.preventDefault();
 
-    const text = [
+    const text = isPrintOnly ? [
+      `*ORDER CETAK PAS FOTO (FILE SUDAH ADA)*`,
+      customerName ? `Nama Pemesan: ${customerName}` : null,
+      customerPhone ? `No. WhatsApp: ${customerPhone}` : null,
+      `Layanan: ${packageItem.name}`,
+      `Kecepatan Cetak: ${printSpeed}`,
+      `Pilihan Set Cetak: ${pasFotoSet}`,
+      `Opsi Warna: Cetak ${pasFotoColor}`,
+      quantity ? `Jumlah Pesanan: ${quantity}` : `Jumlah: 1 Set`,
+      `Cabang Pengambilan: ${currentBranch.name}`,
+      date ? `Rencana Ambil Tanggal: ${date}` : null,
+      notes ? `Catatan Tambahan: ${notes}` : null,
+      ``,
+      `Halo admin, saya ingin cetak pas foto dari file yang sudah saya miliki. File foto akan segera saya kirimkan via WhatsApp (sebagai Dokumen agar resolusi tidak pecah). Mohon segera diproses ya min, terima kasih!`
+    ].filter(Boolean).join('\n') : [
       `*FORM BOOKING POTRAIT STUDIO SEMARANG*`,
       customerName ? `Nama Pemesan: ${customerName}` : null,
       customerPhone ? `No. WhatsApp: ${customerPhone}` : null,
@@ -82,7 +100,7 @@ export default function BookingModal({ packageItem, onClose }) {
         <div className="flex items-center justify-between pb-3 border-b border-warm-100">
           <div>
             <span className="text-[10px] uppercase tracking-wider font-bold text-warm-800">
-              Form Reservasi Jadwal Sesi Foto
+              {isPrintOnly ? 'Form Order Cetak Pas Foto (Kirim File WA)' : 'Form Reservasi Jadwal Sesi Foto'}
             </span>
             <h3 id="modal-title" className="text-base md:text-lg font-extrabold text-charcoal">
               {packageItem.name}
@@ -265,11 +283,80 @@ export default function BookingModal({ packageItem, onClose }) {
             </div>
           )}
 
-          {/* 2. Date Picker */}
+          {/* Print Only Specific: Speed & Quantity Options */}
+          {isPrintOnly && (
+            <div className="space-y-3 pt-1">
+              {/* WhatsApp Document Guide Box */}
+              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 flex items-start gap-2.5">
+                <Check className="size-4 text-emerald-700 shrink-0 mt-0.5" aria-hidden="true" />
+                <div className="leading-relaxed">
+                  <p className="font-bold text-emerald-900">Cara Mudah Kirim File via WA:</p>
+                  <p className="text-[11px] text-emerald-800 mt-0.5">
+                    Setelah menekan tombol hijau di bawah, chat WhatsApp studio akan otomatis terbuka. Cukup <strong>lampirkan file foto Anda sebagai 'Dokumen'</strong> agar resolusi tetap tajam & tidak pecah.
+                  </p>
+                </div>
+              </div>
+
+              {/* Speed Option */}
+              <div>
+                <label className="block text-xs font-bold text-charcoal mb-1.5">
+                  Pilihan Kecepatan Cetak:
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {[
+                    { label: '⚡ Express (± 30 Menit)', val: 'Express 30 Menit (Rp 10.000 / set)', desc: 'Langsung jadi di studio' },
+                    { label: '🕒 Reguler (H+1 Selesai)', val: 'Reguler H+1 (Rp 8.000 / set)', desc: 'Selesai keesokan hari' }
+                  ].map((sp) => {
+                    const isSelected = printSpeed === sp.val;
+                    return (
+                      <button
+                        type="button"
+                        key={sp.label}
+                        onClick={() => setPrintSpeed(sp.val)}
+                        className={`tap-bounce p-2.5 rounded-xl border text-left text-xs transition-all ${
+                          isSelected
+                            ? 'bg-charcoal text-white border-charcoal font-bold shadow-xs'
+                            : 'bg-white text-charcoal border-warm-200 hover:bg-warm-100'
+                        }`}
+                      >
+                        <div className="font-bold">{sp.label}</div>
+                        <div className={`text-[10px] ${isSelected ? 'text-warm-200' : 'text-charcoal-600'}`}>{sp.desc}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Quantity Selector */}
+              <div>
+                <label className="block text-xs font-bold text-charcoal mb-1">
+                  Jumlah Pesanan (Berapa Set):
+                </label>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {['1 Set', '2 Set', '3 Set', '4 Set', '5 Set', '10 Set'].map((q) => (
+                    <button
+                      type="button"
+                      key={q}
+                      onClick={() => setQuantity(q)}
+                      className={`tap-bounce py-1.5 px-3 rounded-xl text-xs font-bold border transition-all ${
+                        quantity === q
+                          ? 'bg-charcoal text-white border-charcoal shadow-xs'
+                          : 'bg-white text-charcoal border-warm-200 hover:bg-warm-100'
+                      }`}
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 2. Date Picker (Pengambilan / Sesi) */}
           <div>
             <label htmlFor="booking-date" className="block text-xs font-bold text-charcoal mb-1 flex items-center gap-1">
               <Calendar className="size-3.5 text-warm-800" aria-hidden="true" />
-              <span>Rencana Tanggal Sesi Foto:</span>
+              <span>{isPrintOnly ? 'Rencana Tanggal Pengambilan Foto:' : 'Rencana Tanggal Sesi Foto:'}</span>
             </label>
             <input
               id="booking-date"
@@ -280,64 +367,68 @@ export default function BookingModal({ packageItem, onClose }) {
             />
           </div>
 
-          {/* 3. DYNAMIC TIME SLOTS ACCORDING TO BRANCH HOURS */}
-          <div>
-            <label className="block text-xs font-bold text-charcoal mb-1.5 flex items-center justify-between">
-              <span className="flex items-center gap-1">
-                <Clock className="size-3.5 text-warm-800" aria-hidden="true" />
-                <span>Pilih Jam Sesi ({currentBranch.name}):</span>
-              </span>
-              <span className="text-[10px] text-charcoal-700">Interval 30 menit</span>
-            </label>
+          {/* 3. DYNAMIC TIME SLOTS (Only for Photoshoot Sessions) */}
+          {!isPrintOnly && (
+            <div>
+              <label className="block text-xs font-bold text-charcoal mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <Clock className="size-3.5 text-warm-800" aria-hidden="true" />
+                  <span>Pilih Jam Sesi ({currentBranch.name}):</span>
+                </span>
+                <span className="text-[10px] text-charcoal-700">Interval 30 menit</span>
+              </label>
 
-            {/* Time Slot Chips Grid */}
-            <div className="grid grid-cols-4 gap-1.5 max-h-36 overflow-y-auto p-1 bg-warm-50 rounded-xl border border-warm-200">
-              {availableTimeSlots.map((slot, sIdx) => {
-                const isSelected = selectedTime === slot;
-                return (
-                  <button
-                    type="button"
-                    key={sIdx}
-                    onClick={() => setSelectedTime(slot)}
-                    className={`py-1.5 px-1 rounded-lg text-[11px] font-bold text-center transition-all ${
-                      isSelected
-                        ? 'bg-charcoal text-white shadow-xs'
-                        : 'bg-white text-charcoal border border-warm-200 hover:bg-warm-100'
-                    }`}
-                  >
-                    {slot.replace(' WIB', '')}
-                  </button>
-                );
-              })}
+              {/* Time Slot Chips Grid */}
+              <div className="grid grid-cols-4 gap-1.5 max-h-36 overflow-y-auto p-1 bg-warm-50 rounded-xl border border-warm-200">
+                {availableTimeSlots.map((slot, sIdx) => {
+                  const isSelected = selectedTime === slot;
+                  return (
+                    <button
+                      type="button"
+                      key={sIdx}
+                      onClick={() => setSelectedTime(slot)}
+                      className={`py-1.5 px-1 rounded-lg text-[11px] font-bold text-center transition-all ${
+                        isSelected
+                          ? 'bg-charcoal text-white shadow-xs'
+                          : 'bg-white text-charcoal border border-warm-200 hover:bg-warm-100'
+                      }`}
+                    >
+                      {slot.replace(' WIB', '')}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-charcoal-700 mt-1">
+                Jam terpilih: <strong className="text-charcoal">{selectedTime}</strong> (sesuai jam operasional {currentBranch.name})
+              </p>
             </div>
-            <p className="text-[10px] text-charcoal-700 mt-1">
-              Jam terpilih: <strong className="text-charcoal">{selectedTime}</strong> (sesuai jam operasional {currentBranch.name})
-            </p>
-          </div>
+          )}
 
           {/* 4. People Count & Notes */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div>
-              <label htmlFor="booking-people" className="block text-[11px] font-bold text-charcoal mb-1">
-                Estimasi Jumlah Orang:
-              </label>
-              <input
-                id="booking-people"
-                type="text"
-                placeholder="misal: 4 orang"
-                value={totalPeople}
-                onChange={(e) => setTotalPeople(e.target.value)}
-                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-charcoal/20"
-              />
-            </div>
-            <div>
+            {!isPrintOnly && (
+              <div>
+                <label htmlFor="booking-people" className="block text-[11px] font-bold text-charcoal mb-1">
+                  Estimasi Jumlah Orang:
+                </label>
+                <input
+                  id="booking-people"
+                  type="text"
+                  placeholder="misal: 4 orang"
+                  value={totalPeople}
+                  onChange={(e) => setTotalPeople(e.target.value)}
+                  className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-charcoal/20"
+                />
+              </div>
+            )}
+            <div className={isPrintOnly ? 'sm:col-span-2' : ''}>
               <label htmlFor="booking-notes" className="block text-[11px] font-bold text-charcoal mb-1">
                 Catatan / Request Khusus:
               </label>
               <input
                 id="booking-notes"
                 type="text"
-                placeholder="misal: wisuda UNDIP, bawa toga"
+                placeholder={isPrintOnly ? "misal: tolong background ganti biru / merah" : "misal: wisuda UNDIP, bawa toga"}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-charcoal/20"
@@ -352,10 +443,12 @@ export default function BookingModal({ packageItem, onClose }) {
               className="tap-bounce w-full flex items-center justify-center gap-2 bg-wa hover:bg-wa-hover text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors min-h-[46px] text-xs md:text-sm"
             >
               <MessageCircle className="size-4 shrink-0" aria-hidden="true" />
-              <span>Konfirmasi Jadwal via WhatsApp</span>
+              <span>{isPrintOnly ? 'Kirim File via WhatsApp (Order Cetak)' : 'Konfirmasi Jadwal via WhatsApp'}</span>
             </button>
             <p className="text-[10px] text-center text-charcoal-700 mt-1.5">
-              Pesan pra-isi akan otomatis memuat paket, cabang, tanggal, dan jam pilihan Anda.
+              {isPrintOnly
+                ? "Chat WhatsApp akan otomatis memuat rincian pesanan. Lampirkan file foto Anda di chat sebagai Dokumen."
+                : "Pesan pra-isi akan otomatis memuat paket, cabang, tanggal, dan jam pilihan Anda."}
             </p>
           </div>
         </form>

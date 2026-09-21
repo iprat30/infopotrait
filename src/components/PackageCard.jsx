@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Clock, Users, ChevronDown, Check, MessageCircle, Calendar, Shirt, Flame, Star, Crown } from 'lucide-react';
+import { Clock, Users, ChevronDown, Check, MessageCircle, Calendar, Shirt, Flame, Star, Crown, FileText, Send } from 'lucide-react';
 import { MAIN_WHATSAPP } from '../data/branchesData';
 
 export default function PackageCard({ item, onOpenBookingModal }) {
   const [expanded, setExpanded] = useState(false);
 
-  const prefilledText = `Halo Admin Potrait Studio, saya ingin pesan paket "${item.name}" (${item.price}${item.priceSuffix || ''}). Mohon info jadwal yang tersedia...`;
+  const prefilledText = item.isPrintOnly
+    ? `Halo Admin Potrait Studio, saya ingin cetak pas foto dari file yang sudah saya miliki. Mohon info prosedur kirim file via WA ya min...`
+    : `Halo Admin Potrait Studio, saya ingin pesan paket "${item.name}" (${item.price}${item.priceSuffix || ''}). Mohon info jadwal yang tersedia...`;
   const waUrl = `https://wa.me/${MAIN_WHATSAPP.number}?text=${encodeURIComponent(prefilledText)}`;
 
   // Render badge with matching badgeType styling
@@ -168,10 +170,19 @@ export default function PackageCard({ item, onOpenBookingModal }) {
               type="button"
               onClick={() => onOpenBookingModal(item)}
               className="tap-bounce inline-flex items-center justify-center gap-1 bg-warm-100 hover:bg-warm-200 text-charcoal text-xs font-bold py-2 px-3 rounded-xl border border-warm-200 transition-colors min-h-[40px]"
-              aria-label={`Pilih jam dan cabang untuk ${item.name}`}
+              aria-label={`Pilih format dan cabang untuk ${item.name}`}
             >
-              <Calendar className="size-3 text-warm-800" aria-hidden="true" />
-              <span>Pilih Jam</span>
+              {item.isPrintOnly ? (
+                <>
+                  <FileText className="size-3 text-warm-800" aria-hidden="true" />
+                  <span>Order Cetak</span>
+                </>
+              ) : (
+                <>
+                  <Calendar className="size-3 text-warm-800" aria-hidden="true" />
+                  <span>Pilih Jam</span>
+                </>
+              )}
             </button>
           )}
 
@@ -183,7 +194,7 @@ export default function PackageCard({ item, onOpenBookingModal }) {
             aria-label={`Pesan ${item.name} via WhatsApp`}
           >
             <MessageCircle className="size-3.5 shrink-0" aria-hidden="true" />
-            <span>Pesan WA</span>
+            <span>{item.isPrintOnly ? 'Kirim File WA' : 'Pesan WA'}</span>
           </a>
         </div>
       </div>

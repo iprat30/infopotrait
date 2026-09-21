@@ -290,6 +290,32 @@ export const PACKAGES_DATA = {
     description: "Foto rapi standar instansi untuk Ijazah, CPNS, BUMN, Visa, Paspor, & Buku Nikah",
     items: [
       {
+        id: "cetak-pasfoto-only",
+        name: "Cetak Pas Foto Saja (File Sudah Ada)",
+        badge: "Kirim File via WA",
+        badgeType: "recommended",
+        isPopular: true,
+        isPrintOnly: true,
+        price: "Mulai Rp 8.000",
+        priceSuffix: " / set",
+        normalPrice: null,
+        capacity: "File Milik Sendiri",
+        duration: "Express 30 Mnt / Reguler H+1",
+        outfits: "Siap Cetak",
+        facilities: [
+          "Khusus untuk Anda yang sudah memiliki file pas foto siap cetak",
+          "Proses mudah: Kirim file langsung via WhatsApp (Format Dokumen agar tajam)",
+          "Pilihan Cetak Kilat Express (± 30 menit) atau Reguler (H+1)",
+          "Kualitas cetak kertas foto lab doff premium standar instansi & tahan lama"
+        ],
+        deliverables: [
+          "Bebas pilih Paket Set Cetak: Set A / Set B / Set C / Set D",
+          "Bebas pilih Cetak Berwarna atau Cetak Hitam Putih (B/W)",
+          "Bisa diambil di Cabang Tembalang (BQ Square / Soedarto) atau Sekaran UNNES"
+        ],
+        note: "Tarif Cetak: Reguler H+1 Rp 8.000 / set | Express 30 Menit Rp 10.000 / set"
+      },
+      {
         id: "pasfoto-express",
         name: "Pas Foto Bebas Jerawat: Express",
         badge: "Paling Laris",
