@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { X, Calendar, MapPin, MessageCircle, Clock, Check, Info } from 'lucide-react';
+import { X, Calendar, MapPin, MessageCircle, Clock, Check, Info, User, Phone } from 'lucide-react';
 import { BRANCHES_DATA, MAIN_WHATSAPP } from '../data/branchesData';
 
 export default function BookingModal({ packageItem, onClose }) {
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [selectedBranchId, setSelectedBranchId] = useState('bq-square');
   const [date, setDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('10:00 WIB');
@@ -43,6 +45,8 @@ export default function BookingModal({ packageItem, onClose }) {
 
     const text = [
       `*FORM BOOKING POTRAIT STUDIO SEMARANG*`,
+      customerName ? `Nama Pemesan: ${customerName}` : null,
+      customerPhone ? `No. WhatsApp: ${customerPhone}` : null,
       `Paket: ${packageItem.name} (${packageItem.price}${packageItem.priceSuffix || ''})`,
       `Cabang: ${currentBranch.name}`,
       date ? `Rencana Tanggal: ${date}` : `Tanggal: (Menyesuaikan)`,
@@ -103,6 +107,43 @@ export default function BookingModal({ packageItem, onClose }) {
         {/* Form Inputs */}
         <form onSubmit={handleSendWa} className="mt-3.5 space-y-3.5">
           
+          {/* Customer Info (Name & WhatsApp) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label htmlFor="booking-name" className="block text-xs font-bold text-charcoal mb-1 flex items-center gap-1">
+                <User className="size-3.5 text-warm-800" aria-hidden="true" />
+                <span>Nama Lengkap:</span>
+                <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="booking-name"
+                type="text"
+                required
+                placeholder="Contoh: Rian Pratama"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal placeholder:text-charcoal-400 focus:outline-none focus:ring-2 focus:ring-charcoal/20 focus:bg-white transition-all"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="booking-phone" className="block text-xs font-bold text-charcoal mb-1 flex items-center gap-1">
+                <Phone className="size-3.5 text-warm-800" aria-hidden="true" />
+                <span>No. WhatsApp:</span>
+                <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="booking-phone"
+                type="tel"
+                required
+                placeholder="Contoh: 081234567890"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal placeholder:text-charcoal-400 focus:outline-none focus:ring-2 focus:ring-charcoal/20 focus:bg-white transition-all"
+              />
+            </div>
+          </div>
+
           {/* 1. Branch Picker */}
           <div>
             <label className="block text-xs font-bold text-charcoal mb-1.5 flex items-center justify-between">
