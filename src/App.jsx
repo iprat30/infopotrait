@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import NavigationSwitcher from './components/NavigationSwitcher';
 import PortfolioTicker from './components/PortfolioTicker';
@@ -15,11 +15,53 @@ import BookingModal from './components/BookingModal';
 import { PACKAGES_DATA } from './data/packagesData';
 import { PlusCircle, CheckCircle2 } from 'lucide-react';
 
+// Categories that trigger faster promo reveal (high-intent visitors)
+const HIGH_INTENT_CATEGORIES = ['wisuda-indoor', 'wisuda-outdoor', 'group'];
+const DEFAULT_REVEAL_DELAY = 35_000;  // 35 sec for normal browsing
+const INTENT_REVEAL_DELAY  = 15_000;  // 15 sec for wisuda/family viewers
+
 export default function App() {
-  const [activeTab, setActiveTab] = useState('packages'); // 'packages' | 'portfolio' | 'branches' | 'faq'
+  const [activeTab, setActiveTab] = useState('packages');
   const [selectedCategory, setSelectedCategory] = useState('wisuda-indoor');
   const [bookingPackage, setBookingPackage] = useState(null);
   const [showAddOns, setShowAddOns] = useState(false);
+
+  // Promo reveal state — hidden on first load, shown after delay
+  const [promoVisible, setPromoVisible] = useState(false);
+  const [promoDismissed, setPromoDismissed] = useState(false);
+  const promoTimerRef = useRef(null);
+  const promoRevealedRef = useRef(false); // ensure we only fire once per session
+
+  // Smart reveal: watch selectedCategory and activeTab
+  useEffect(() => {
+    if (promoRevealedRef.current || promoDismissed) return;
+
+    // Clear any existing timer
+    clearTimeout(promoTimerRef.current);
+
+    if (activeTab !== 'packages') return;
+
+    const delay = HIGH_INTENT_CATEGORIES.includes(selectedCategory)
+      ? INTENT_REVEAL_DELAY
+      : DEFAULT_REVEAL_DELAY;
+
+    promoTimerRef.current = setTimeout(() => {
+      if (!promoRevealedRef.current) {
+        promoRevealedRef.current = true;
+        setPromoVisible(true);
+      }
+    }, delay);
+
+    return () => clearTimeout(promoTimerRef.current);
+  }, [selectedCategory, activeTab, promoDismissed]);
+
+  const handleDismissPromo = () => {
+    setPromoVisible(false);
+    setPromoDismissed(true);
+    clearTimeout(promoTimerRef.current);
+  };
+
+
 
   const currentCategoryData = PACKAGES_DATA[selectedCategory];
 
@@ -45,8 +87,13 @@ export default function App() {
             }}
           />
 
-          {/* Compact Promo Banner */}
-          <CompactPromo />
+          {/* Smart FOMO Promo — hidden on arrival, revealed after time-based + intent trigger */}
+          <CompactPromo
+            visible={promoVisible}
+            selectedCategory={selectedCategory}
+            onDismiss={handleDismissPromo}
+          />
+
 
           {/* Simple Category Tabs (All Visible at Once, No Photos) */}
           <CategoryTabs
