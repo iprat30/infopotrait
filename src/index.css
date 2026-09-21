@@ -13,6 +13,18 @@
   }
 }
 
+/* Hide scrollbar but keep scroll functionality — used by PortfolioTicker */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;   /* IE / Edge */
+    scrollbar-width: none;       /* Firefox */
+  }
+}
+
+
 /* Safe area padding utilities for modern mobile phones (iPhone notch / home bar) */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .pb-safe {

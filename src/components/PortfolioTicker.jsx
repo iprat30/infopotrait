@@ -1,31 +1,136 @@
-import React, { useState, useRef } from 'react';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import React, { useRef, useEffect } from 'react';
+import { Sparkles, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PORTFOLIO_ITEMS } from '../data/packagesData';
 
+// Triple items so there's always room to drag left AND right
+const TICKER_ITEMS = [...PORTFOLIO_ITEMS, ...PORTFOLIO_ITEMS, ...PORTFOLIO_ITEMS];
+
+const SCROLL_SPEED = 0.7;   // px per animation frame
+const RESUME_DELAY = 2200;  // ms idle before auto-scroll resumes
+const DRAG_THRESHOLD = 6;   // px movement to count as drag (not tap)
+
 export default function PortfolioTicker({ onSelectCategory }) {
-  const [isPaused, setIsPaused] = useState(false);
-  // Track touch start position to distinguish tap vs swipe
-  const touchStartX = useRef(null);
-  const touchStartY = useRef(null);
+  const trackRef = useRef(null);
+  const rafRef = useRef(null);
+  const resumeTimerRef = useRef(null);
+  const isDragging = useRef(false);
+  const didDrag = useRef(false);
+  const pointerStartX = useRef(0);
+  const scrollAtStart = useRef(0);
 
-  // Duplicate for seamless infinite loop
-  const tickerItems = [...PORTFOLIO_ITEMS, ...PORTFOLIO_ITEMS];
+  /* ── Auto-scroll engine ─────────────────────────────────── */
+  const autoScroll = () => {
+    const el = trackRef.current;
+    if (!el) return;
 
+    el.scrollLeft += SCROLL_SPEED;
+
+    // Seamless loop: when we reach 2/3, snap back to 1/3
+    const oneThird = el.scrollWidth / 3;
+    if (el.scrollLeft >= oneThird * 2) {
+      el.scrollLeft -= oneThird;
+    }
+
+    rafRef.current = requestAnimationFrame(autoScroll);
+  };
+
+  const startAutoScroll = () => {
+    cancelAutoScroll();
+    rafRef.current = requestAnimationFrame(autoScroll);
+  };
+
+  const cancelAutoScroll = () => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  };
+
+  const scheduleResume = () => {
+    clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(startAutoScroll, RESUME_DELAY);
+  };
+
+  // Initialise: start scroll from middle section so there's left-room
+  useEffect(() => {
+    const el = trackRef.current;
+    if (el) {
+      el.scrollLeft = el.scrollWidth / 3;
+    }
+    startAutoScroll();
+    return () => {
+      cancelAutoScroll();
+      clearTimeout(resumeTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ── Looping guard on manual scroll ────────────────────── */
+  const handleScroll = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    const oneThird = el.scrollWidth / 3;
+    if (el.scrollLeft >= oneThird * 2) el.scrollLeft -= oneThird;
+    if (el.scrollLeft < 0) el.scrollLeft += oneThird;
+  };
+
+  /* ── Pointer / Mouse drag (desktop) ────────────────────── */
+  const handleMouseDown = (e) => {
+    isDragging.current = true;
+    didDrag.current = false;
+    pointerStartX.current = e.clientX;
+    scrollAtStart.current = trackRef.current.scrollLeft;
+    cancelAutoScroll();
+    clearTimeout(resumeTimerRef.current);
+    trackRef.current.style.cursor = 'grabbing';
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging.current) return;
+    const dx = e.clientX - pointerStartX.current;
+    if (Math.abs(dx) > DRAG_THRESHOLD) didDrag.current = true;
+    trackRef.current.scrollLeft = scrollAtStart.current - dx;
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    trackRef.current.style.cursor = 'grab';
+    scheduleResume();
+  };
+
+  /* ── Touch drag (mobile) ────────────────────────────────── */
   const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    setIsPaused(true); // Pause marquee immediately on touch
+    isDragging.current = true;
+    didDrag.current = false;
+    pointerStartX.current = e.touches[0].clientX;
+    scrollAtStart.current = trackRef.current.scrollLeft;
+    cancelAutoScroll();
+    clearTimeout(resumeTimerRef.current);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging.current) return;
+    const dx = e.touches[0].clientX - pointerStartX.current;
+    if (Math.abs(dx) > DRAG_THRESHOLD) {
+      didDrag.current = true;
+      trackRef.current.scrollLeft = scrollAtStart.current - dx;
+      e.preventDefault(); // prevent page scroll while swiping ticker
+    }
   };
 
   const handleTouchEnd = () => {
-    // Small delay before resuming so scroll animation doesn't jump
-    setTimeout(() => setIsPaused(false), 400);
+    isDragging.current = false;
+    scheduleResume();
   };
 
+  /* ── Tap / Click navigation ─────────────────────────────── */
   const handleCardClick = (catId) => {
+    if (didDrag.current) return; // ignore if user was dragging
+    didDrag.current = false;
     if (onSelectCategory) {
       onSelectCategory(catId);
-      // Scroll gently to the category tabs area so user can see the packages
       setTimeout(() => {
         const el = document.getElementById('category-tabs');
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -33,22 +138,9 @@ export default function PortfolioTicker({ onSelectCategory }) {
     }
   };
 
-  const handleCardTouchEnd = (e, catId) => {
-    if (touchStartX.current === null) return;
-    const dx = Math.abs(e.changedTouches[0].clientX - touchStartX.current);
-    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
-    // Only navigate if it was a tap (small movement), not a swipe
-    if (dx < 12 && dy < 12) {
-      handleCardClick(catId);
-    }
-    touchStartX.current = null;
-    touchStartY.current = null;
-    setTimeout(() => setIsPaused(false), 400);
-  };
-
   return (
-    <section className="w-full overflow-hidden py-1 mb-1.5" aria-label="Galeri Portofolio Unggulan">
-      {/* Mini Title & Hook */}
+    <section className="w-full py-1 mb-1.5" aria-label="Galeri Portofolio Unggulan">
+      {/* Header Row */}
       <div className="max-w-xl mx-auto px-4 mb-2 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <span className="inline-flex items-center justify-center size-5 rounded-full bg-amber-100 text-amber-800">
@@ -58,65 +150,73 @@ export default function PortfolioTicker({ onSelectCategory }) {
             Hasil Foto Klien Terbaru
           </span>
         </div>
-        <span className="text-[10px] font-bold text-warm-800 bg-warm-100/90 px-2 py-0.5 rounded-full border border-warm-200/80">
-          ☝️ Sentuh foto → lihat paket
+        {/* Gesture hint */}
+        <span className="flex items-center gap-0.5 text-[10px] font-bold text-warm-700 bg-warm-100/90 px-2 py-0.5 rounded-full border border-warm-200/80 select-none">
+          <ChevronLeft className="size-3" />
+          <span>geser</span>
+          <ChevronRight className="size-3" />
         </span>
       </div>
 
-      {/* Infinite Running Marquee Track */}
-      <div className="relative w-full overflow-hidden">
-        {/* Soft edge blur masks */}
-        <div className="absolute left-0 inset-y-0 w-6 bg-gradient-to-r from-warm-50 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 inset-y-0 w-6 bg-gradient-to-l from-warm-50 to-transparent z-10 pointer-events-none" />
+      {/* Scrollable track */}
+      <div className="relative w-full">
+        {/* Fade masks */}
+        <div className="absolute left-0 inset-y-0 w-8 bg-gradient-to-r from-warm-50 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 inset-y-0 w-8 bg-gradient-to-l from-warm-50 to-transparent z-10 pointer-events-none" />
 
-        {/* Marquee track — pause controlled by React state for both desktop & mobile */}
         <div
-          className="animate-marquee flex gap-3 py-1"
-          style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
+          ref={trackRef}
+          className="flex gap-3 py-1 px-2 overflow-x-scroll no-scrollbar cursor-grab select-none"
+          style={{ scrollBehavior: 'auto', WebkitOverflowScrolling: 'touch' }}
+          onScroll={handleScroll}
+          /* Desktop drag */
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          /* Mobile swipe */
           onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {tickerItems.map((item, index) => (
+          {TICKER_ITEMS.map((item, index) => (
             <button
               type="button"
-              key={`${item.id}-${index}`}
+              key={`ticker-${item.id}-${index}`}
+              draggable={false}
               onClick={() => handleCardClick(item.category)}
-              onTouchEnd={(e) => handleCardTouchEnd(e, item.category)}
-              className="group relative shrink-0 w-44 sm:w-52 h-60 rounded-2xl overflow-hidden bg-charcoal border border-warm-200 shadow-soft active:scale-95 transition-all hover:shadow-elevated hover:border-warm-500 text-left focus:outline-none focus:ring-2 focus:ring-warm-500"
+              className="group relative shrink-0 w-44 sm:w-52 h-60 rounded-2xl overflow-hidden bg-charcoal border border-warm-200 shadow-soft active:scale-95 transition-transform duration-150 text-left focus:outline-none focus:ring-2 focus:ring-warm-500"
               aria-label={`Lihat paket ${item.category} — ${item.title}`}
             >
-              {/* Photo Image */}
+              {/* Photo */}
               <img
                 src={item.image}
                 alt={item.title}
+                draggable={false}
                 loading="lazy"
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+                className="w-full h-full object-cover object-center pointer-events-none"
               />
 
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
-              {/* Category Pill */}
+              {/* Category pill */}
               <div className="absolute top-2.5 left-2.5">
                 <span className="bg-charcoal/80 backdrop-blur-md text-white text-[9.5px] font-bold px-2 py-0.5 rounded-full border border-white/20 uppercase tracking-tight">
                   {item.category.replace(/-/g, ' ')}
                 </span>
               </div>
 
-              {/* Tap CTA Overlay — visible always on mobile */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-active:opacity-100 transition-opacity bg-black/20">
-                <span className="bg-white/90 text-charcoal text-[11px] font-black px-3 py-1.5 rounded-full shadow-lg">
+              {/* Tap feedback overlay */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-active:opacity-100 transition-opacity duration-100 bg-black/25 pointer-events-none">
+                <span className="bg-white/95 text-charcoal text-[11px] font-black px-3 py-1.5 rounded-full shadow-lg">
                   Lihat Paket →
                 </span>
               </div>
 
-              {/* Bottom Caption */}
-              <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white">
-                <h3 className="text-xs font-black line-clamp-1 group-hover:text-amber-300 transition-colors">
-                  {item.title}
-                </h3>
+              {/* Caption */}
+              <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white pointer-events-none">
+                <h3 className="text-xs font-black line-clamp-1">{item.title}</h3>
                 <div className="flex items-center justify-between text-[10px] text-warm-200 mt-0.5">
                   <span className="truncate max-w-[110px]">{item.location}</span>
                   <span className="inline-flex items-center gap-0.5 font-bold text-amber-300">
@@ -132,5 +232,3 @@ export default function PortfolioTicker({ onSelectCategory }) {
     </section>
   );
 }
-
-
