@@ -274,7 +274,7 @@ export default function App() {
         <button
           type="button"
           onClick={() => setShowPromoDetail(true)}
-          className="fixed bottom-20 right-3.5 z-30 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-charcoal text-[11px] font-black py-2 px-3.5 rounded-full shadow-elevated border-2 border-white/60 flex items-center gap-1.5 animate-bounce tap-bounce cursor-pointer"
+          className="fixed bottom-[5.5rem] right-3.5 z-50 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-charcoal text-[11px] font-black py-2 px-3.5 rounded-full shadow-elevated border-2 border-white/60 flex items-center gap-1.5 animate-bounce tap-bounce cursor-pointer"
           aria-label="Buka Promo Wisuda Hemat Rp299k"
         >
           <Flame className="size-3.5 fill-charcoal text-charcoal" />
