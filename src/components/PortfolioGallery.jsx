@@ -4,7 +4,7 @@ import { Sparkles, MapPin } from 'lucide-react';
 
 const FILTER_TAGS = [
   { id: 'all', label: 'Semua Portofolio' },
-  { id: 'wisuda-indoor', label: 'Wisuda Studio' },
+  { id: 'wisuda-indoor', label: 'Wisuda / Family' },
   { id: 'wisuda-outdoor', label: 'Wisuda Outdoor' },
   { id: 'pasfoto', label: 'Pas Foto & ID' },
   { id: 'selfi', label: 'Self Photo' },

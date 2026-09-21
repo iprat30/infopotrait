@@ -6,7 +6,7 @@ export const SOCIAL_MEDIA = [
 ];
 
 export const CATEGORIES = [
-  { id: "wisuda-indoor", label: "Wisuda Indoor", isHot: true },
+  { id: "wisuda-indoor", label: "Wisuda / Family", isHot: true },
   { id: "wisuda-outdoor", label: "Wisuda Outdoor", isHot: false },
   { id: "pasfoto", label: "Pas Foto & ID", isHot: true },
   { id: "selfi", label: "Self Photo", isHot: true },
@@ -104,34 +104,11 @@ export const PORTFOLIO_ITEMS = [
 ];
 
 export const PACKAGES_DATA = {
-  // 1. WISUDA INDOOR
+  // 1. WISUDA / FAMILY (STUDIO)
   "wisuda-indoor": {
-    categoryTitle: "Paket Wisuda Indoor (Studio)",
-    description: "Sesi foto wisuda di studio dengan pencahayaan profesional, ruang ber-AC, dan backdrop elegan",
+    categoryTitle: "Paket Wisuda / Family (Studio)",
+    description: "Sesi foto wisuda & keluarga di studio dengan pencahayaan profesional, ruang ber-AC, dan backdrop elegan",
     items: [
-      {
-        id: "wisuda-hemat",
-        name: "Wisuda Hemat (Special Offer)",
-        badge: "Paling Laris",
-        badgeType: "bestseller",
-        isPopular: true,
-        price: "Rp 299.000",
-        normalPrice: "Rp 375.000",
-        capacity: "Hingga 5 Orang",
-        duration: "± 10 Menit",
-        outfits: "Wisudawan bebas 2 outfit",
-        facilities: [
-          "Cocok untuk wisuda bersama keluarga (hingga 5 orang)",
-          "Durasi ± 10 menit pemotretan",
-          "Wisudawan bebas 2 outfit"
-        ],
-        deliverables: [
-          "4 file edit premium",
-          "Gratis 4 cetak 10R+ (20x30 cm)",
-          "Seluruh file sesi foto via Google Drive"
-        ],
-        note: "Hemat Rp76.000 dari harga normal"
-      },
       {
         id: "family-favorit",
         name: "Family Graduation: Paket Favorit",
