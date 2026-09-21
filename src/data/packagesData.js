@@ -6,6 +6,7 @@ export const SOCIAL_MEDIA = [
 ];
 
 export const CATEGORIES = [
+  { id: "promo", label: "Promo", isHot: true, isPromo: true },
   { id: "wisuda-indoor", label: "Wisuda / Family", isHot: true },
   { id: "wisuda-outdoor", label: "Wisuda Outdoor", isHot: false },
   { id: "pasfoto", label: "Pas Foto & ID", isHot: true },
@@ -104,6 +105,43 @@ export const PORTFOLIO_ITEMS = [
 ];
 
 export const PACKAGES_DATA = {
+  // 0. PROMO SPESIAL & FLASHSALE
+  "promo": {
+    categoryTitle: "🔥 Promo Spesial & Flash Sale",
+    description: "Penawaran harga terbaik dengan diskon terbatas minggu ini. Kuota terbatas, amankan slot Anda sekarang!",
+    items: [
+      {
+        id: "wisuda-hemat",
+        name: "Wisuda Hemat (Family & Bestie)",
+        badge: "Hemat Rp 76.000",
+        badgeType: "bestseller",
+        isPopular: true,
+        price: "Rp 299.000",
+        normalPrice: "Rp 375.000",
+        capacity: "Hingga 5 Orang",
+        duration: "± 10 Menit",
+        outfits: "Wisudawan bebas 2 outfit",
+        facilities: [
+          "Sangat cocok untuk wisuda bersama keluarga (hingga 5 orang)",
+          "Durasi ± 10 menit pemotretan terarah & nyaman",
+          "Wisudawan bebas 2 outfit bergantian"
+        ],
+        deliverables: [
+          "4 file edit premium beresolusi tinggi",
+          "GRATIS 4 cetak 10R+ (20x30 cm) kualitas lab",
+          "Seluruh file sesi foto via Google Drive",
+          "Bebas bawa atribut toga, selempang & properti sendiri"
+        ],
+        note: "Diskon 20% khusus booking minggu ini — Sisa 2 kuota studio!"
+      }
+    ],
+    addOns: [
+      { name: "Tambah Anggota Keluarga", price: "Rp 10.000 / orang" },
+      { name: "Tambah File Edit", price: "Rp 25.000 / file" },
+      { name: "Ganti Outfit Tambahan", price: "Rp 100.000" }
+    ]
+  },
+
   // 1. WISUDA / FAMILY (STUDIO)
   "wisuda-indoor": {
     categoryTitle: "Paket Wisuda / Family (Studio)",

@@ -17,7 +17,7 @@ import { PACKAGES_DATA } from './data/packagesData';
 import { PlusCircle, CheckCircle2, Flame } from 'lucide-react';
 
 // Categories that trigger faster promo reveal (high-intent visitors)
-const HIGH_INTENT_CATEGORIES = ['wisuda-indoor', 'wisuda-outdoor', 'group'];
+const HIGH_INTENT_CATEGORIES = ['promo', 'wisuda-indoor', 'wisuda-outdoor', 'group'];
 const DEFAULT_REVEAL_DELAY = 30_000;  // 30 sec for normal browsing
 const INTENT_REVEAL_DELAY  = 12_000;  // 12 sec for wisuda/family viewers
 
