@@ -13,6 +13,7 @@ import FloatingCta from './components/FloatingCta';
 import BookingModal from './components/BookingModal';
 import PromoHookModal from './components/PromoHookModal';
 import PromoDetailModal from './components/PromoDetailModal';
+import PasFotoPrintNavigator from './components/PasFotoPrintNavigator';
 import { PACKAGES_DATA } from './data/packagesData';
 import { PlusCircle, CheckCircle2, Flame } from 'lucide-react';
 
@@ -131,6 +132,13 @@ export default function App() {
             ) : (
               /* Standard Packages List (Clean Typography, No Photos on Cards, with Booking Hours) */
               <div className="space-y-3">
+                {/* Interactive Pas Foto Print Configurator & Calculator */}
+                {selectedCategory === 'pasfoto' && (
+                  <PasFotoPrintNavigator
+                    onOpenBookingModal={(pkg) => setBookingPackage(pkg)}
+                  />
+                )}
+
                 {currentCategoryData?.items?.map((item) => (
                   <PackageCard
                     key={item.id}

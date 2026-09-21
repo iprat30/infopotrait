@@ -23,6 +23,12 @@ export default function BookingModal({ packageItem, onClose }) {
 
   const currentBranch = BRANCHES_DATA.find((b) => b.id === selectedBranchId) || (isSelfPhoto ? BRANCHES_DATA[1] : BRANCHES_DATA[0]);
 
+  // Total Biaya calculation for Print Only
+  const qtyNumber = parseInt(quantity) || 1;
+  const unitPrice = printSpeed.includes('8.000') ? 8000 : 10000;
+  const printTotalBiaya = unitPrice * qtyNumber;
+  const formatRupiah = (num) => `Rp ${num.toLocaleString('id-ID')}`;
+
   // Dynamic available time slots based on branch & day of week
   const availableTimeSlots = useMemo(() => {
     let closingHour = 20; // Default 20.00 WIB
@@ -56,10 +62,11 @@ export default function BookingModal({ packageItem, onClose }) {
       customerName ? `Nama Pemesan: ${customerName}` : null,
       customerPhone ? `No. WhatsApp: ${customerPhone}` : null,
       `Layanan: ${packageItem.name}`,
-      `Kecepatan Cetak: ${printSpeed}`,
       `Pilihan Set Cetak: ${pasFotoSet}`,
-      `Opsi Warna: Cetak ${pasFotoColor}`,
-      quantity ? `Jumlah Pesanan: ${quantity}` : `Jumlah: 1 Set`,
+      `Opsi Varian Warna: Cetak ${pasFotoColor}`,
+      `Kecepatan Cetak: ${printSpeed}`,
+      `Jumlah Pesanan: ${quantity} (${qtyNumber} Set × ${formatRupiah(unitPrice)})`,
+      `*TOTAL BIAYA: ${formatRupiah(printTotalBiaya)}*`,
       `Cabang Pengambilan: ${currentBranch.name}`,
       date ? `Rencana Ambil Tanggal: ${date}` : null,
       notes ? `Catatan Tambahan: ${notes}` : null,
@@ -347,6 +354,22 @@ export default function BookingModal({ packageItem, onClose }) {
                       {q}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Live Total Biaya Box */}
+              <div className="p-3.5 bg-gradient-to-br from-charcoal-900 to-charcoal text-white rounded-2xl flex items-center justify-between border-2 border-amber-400/50 shadow-soft">
+                <div>
+                  <span className="text-[10px] text-warm-300 font-bold uppercase tracking-wider block">
+                    Total Biaya Cetak:
+                  </span>
+                  <span className="text-xl font-black text-amber-300 font-mono tracking-tight">
+                    {formatRupiah(printTotalBiaya)}
+                  </span>
+                </div>
+                <div className="text-right text-[11px] text-warm-200">
+                  <span className="font-bold text-white block">{quantity}</span>
+                  <span>@ {formatRupiah(unitPrice)} / set</span>
                 </div>
               </div>
             </div>
