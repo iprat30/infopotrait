@@ -4,7 +4,7 @@ import { Flame } from 'lucide-react';
 
 export default function CategoryTabs({ selectedCategory, onSelectCategory }) {
   return (
-    <div className="pt-2 pb-1.5 px-4 max-w-xl mx-auto">
+    <div id="category-tabs" className="pt-2 pb-1.5 px-4 max-w-xl mx-auto">
       <div className="flex items-center justify-between mb-1.5 px-0.5">
         <span className="text-[11px] font-extrabold uppercase tracking-wider text-charcoal">
           Pilih Kategori Layanan:
