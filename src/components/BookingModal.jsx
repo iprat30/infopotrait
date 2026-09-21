@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { X, Calendar, MapPin, MessageCircle, Clock, Check, Info, User, Phone } from 'lucide-react';
+import { X, Calendar, MapPin, MessageCircle, Clock, Check, Info, User, Phone, Plus, Minus, Trash2 } from 'lucide-react';
 import { BRANCHES_DATA, MAIN_WHATSAPP } from '../data/branchesData';
+import { PAS_FOTO_SETS, SPEED_OPTIONS } from './PasFotoPrintNavigator';
 
 export default function BookingModal({ packageItem, onClose }) {
   const [customerName, setCustomerName] = useState('');
@@ -10,10 +11,22 @@ export default function BookingModal({ packageItem, onClose }) {
   const isPrintOnly = packageItem?.isPrintOnly || packageItem?.id === 'cetak-pasfoto-only';
 
   const [selectedBranchId, setSelectedBranchId] = useState(isSelfPhoto ? 'prof-soedarto' : 'bq-square');
+  
+  // For standard single pas foto package
   const [pasFotoSet, setPasFotoSet] = useState('Set A (4x6 = 4 lembar)');
   const [pasFotoColor, setPasFotoColor] = useState('Warna');
   const [printSpeed, setPrintSpeed] = useState('Express 30 Menit (Rp 10.000 / set)');
-  const [quantity, setQuantity] = useState('1 Set');
+
+  // For multi-item custom print orders (passed from PasFotoPrintNavigator if available)
+  const [customOrderItems, setCustomOrderItems] = useState(
+    packageItem?.customOrderItems || [
+      { id: 'item-1', setId: 'set-a', color: 'Warna', qty: 2 },
+      { id: 'item-2', setId: 'set-b', color: 'Hitam Putih', qty: 1 },
+      { id: 'item-3', setId: 'set-c', color: 'Warna', qty: 1 },
+      { id: 'item-4', setId: 'set-d', color: 'Hitam Putih', qty: 1 },
+    ]
+  );
+
   const [date, setDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('10:00 WIB');
   const [totalPeople, setTotalPeople] = useState('');
@@ -23,11 +36,44 @@ export default function BookingModal({ packageItem, onClose }) {
 
   const currentBranch = BRANCHES_DATA.find((b) => b.id === selectedBranchId) || (isSelfPhoto ? BRANCHES_DATA[1] : BRANCHES_DATA[0]);
 
-  // Total Biaya calculation for Print Only
-  const qtyNumber = parseInt(quantity) || 1;
+  // Unit price calculation
   const unitPrice = printSpeed.includes('8.000') ? 8000 : 10000;
-  const printTotalBiaya = unitPrice * qtyNumber;
+  const totalSets = customOrderItems.reduce((acc, it) => acc + (it.qty || 0), 0);
+  const printTotalBiaya = unitPrice * totalSets;
   const formatRupiah = (num) => `Rp ${num.toLocaleString('id-ID')}`;
+
+  const handleUpdateItemQty = (id, delta) => {
+    setCustomOrderItems((prev) =>
+      prev
+        .map((it) => (it.id === id ? { ...it, qty: Math.max(1, it.qty + delta) } : it))
+        .filter(Boolean)
+    );
+  };
+
+  const handleUpdateItemColor = (id, color) => {
+    setCustomOrderItems((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, color } : it))
+    );
+  };
+
+  const handleUpdateItemSet = (id, setId) => {
+    setCustomOrderItems((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, setId } : it))
+    );
+  };
+
+  const handleRemoveItem = (id) => {
+    if (customOrderItems.length > 1) {
+      setCustomOrderItems((prev) => prev.filter((it) => it.id !== id));
+    }
+  };
+
+  const handleAddItem = () => {
+    setCustomOrderItems((prev) => [
+      ...prev,
+      { id: `item-${Date.now()}`, setId: 'set-a', color: 'Warna', qty: 1 }
+    ]);
+  };
 
   // Dynamic available time slots based on branch & day of week
   const availableTimeSlots = useMemo(() => {
@@ -57,36 +103,48 @@ export default function BookingModal({ packageItem, onClose }) {
   const handleSendWa = (e) => {
     e.preventDefault();
 
-    const text = isPrintOnly ? [
-      `*ORDER CETAK PAS FOTO (FILE SUDAH ADA)*`,
-      customerName ? `Nama Pemesan: ${customerName}` : null,
-      customerPhone ? `No. WhatsApp: ${customerPhone}` : null,
-      `Layanan: ${packageItem.name}`,
-      `Pilihan Set Cetak: ${pasFotoSet}`,
-      `Opsi Varian Warna: Cetak ${pasFotoColor}`,
-      `Kecepatan Cetak: ${printSpeed}`,
-      `Jumlah Pesanan: ${quantity} (${qtyNumber} Set × ${formatRupiah(unitPrice)})`,
-      `*TOTAL BIAYA: ${formatRupiah(printTotalBiaya)}*`,
-      `Cabang Pengambilan: ${currentBranch.name}`,
-      date ? `Rencana Ambil Tanggal: ${date}` : null,
-      notes ? `Catatan Tambahan: ${notes}` : null,
-      ``,
-      `Halo admin, saya ingin cetak pas foto dari file yang sudah saya miliki. File foto akan segera saya kirimkan via WhatsApp (sebagai Dokumen agar resolusi tidak pecah). Mohon segera diproses ya min, terima kasih!`
-    ].filter(Boolean).join('\n') : [
-      `*FORM BOOKING POTRAIT STUDIO SEMARANG*`,
-      customerName ? `Nama Pemesan: ${customerName}` : null,
-      customerPhone ? `No. WhatsApp: ${customerPhone}` : null,
-      `Paket: ${packageItem.name} (${packageItem.price}${packageItem.priceSuffix || ''})`,
-      isPasFoto ? `Pilihan Set Cetak: ${pasFotoSet}` : null,
-      isPasFoto ? `Opsi Warna: Cetak ${pasFotoColor}` : null,
-      `Cabang: ${currentBranch.name}`,
-      date ? `Rencana Tanggal: ${date}` : `Tanggal: (Menyesuaikan)`,
-      `Jam yang Diinginkan: ${selectedTime}`,
-      totalPeople ? `Jumlah Orang: ${totalPeople}` : null,
-      notes ? `Catatan Tambahan: ${notes}` : null,
-      ``,
-      `Halo admin, apakah jadwal sesi foto pada jam tersebut masih tersedia? Terima kasih.`
-    ].filter(Boolean).join('\n');
+    let text;
+    if (isPrintOnly) {
+      const itemsList = customOrderItems.map((it, idx) => {
+        const s = PAS_FOTO_SETS.find((x) => x.id === it.setId) || PAS_FOTO_SETS[0];
+        const sub = it.qty * unitPrice;
+        return `${idx + 1}. ${s.code} (${s.detail}) [${it.color.toUpperCase()}] × ${it.qty} Set = ${formatRupiah(sub)}`;
+      }).join('\n');
+
+      text = [
+        `*ORDER CETAK PAS FOTO (FILE SUDAH ADA)*`,
+        customerName ? `Nama Pemesan: ${customerName}` : null,
+        customerPhone ? `No. WhatsApp: ${customerPhone}` : null,
+        `----------------------------------------`,
+        `*Rincian Kombinasi Cetak:*`,
+        itemsList,
+        `----------------------------------------`,
+        `Kecepatan Cetak: ${printSpeed}`,
+        `Total Pesanan: ${totalSets} Set`,
+        `*TOTAL BIAYA: ${formatRupiah(printTotalBiaya)}*`,
+        `Cabang Pengambilan: ${currentBranch.name}`,
+        date ? `Rencana Ambil Tanggal: ${date}` : null,
+        notes ? `Catatan Tambahan: ${notes}` : null,
+        ``,
+        `Halo admin, saya ingin cetak pas foto dari file yang sudah saya miliki dengan rincian di atas. File foto akan segera saya kirimkan via WhatsApp ini (sebagai Dokumen agar resolusi tidak pecah). Mohon segera diproses ya min, terima kasih!`
+      ].filter(Boolean).join('\n');
+    } else {
+      text = [
+        `*FORM BOOKING POTRAIT STUDIO SEMARANG*`,
+        customerName ? `Nama Pemesan: ${customerName}` : null,
+        customerPhone ? `No. WhatsApp: ${customerPhone}` : null,
+        `Paket: ${packageItem.name} (${packageItem.price}${packageItem.priceSuffix || ''})`,
+        isPasFoto ? `Pilihan Set Cetak: ${pasFotoSet}` : null,
+        isPasFoto ? `Opsi Warna: Cetak ${pasFotoColor}` : null,
+        `Cabang: ${currentBranch.name}`,
+        date ? `Rencana Tanggal: ${date}` : `Tanggal: (Menyesuaikan)`,
+        `Jam yang Diinginkan: ${selectedTime}`,
+        totalPeople ? `Jumlah Orang: ${totalPeople}` : null,
+        notes ? `Catatan Tambahan: ${notes}` : null,
+        ``,
+        `Halo admin, apakah jadwal sesi foto pada jam tersebut masih tersedia? Terima kasih.`
+      ].filter(Boolean).join('\n');
+    }
 
     const url = `https://wa.me/${MAIN_WHATSAPP.number}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -126,47 +184,45 @@ export default function BookingModal({ packageItem, onClose }) {
         {/* Selected Package Summary Box */}
         <div className="mt-3 p-3 bg-warm-50 rounded-xl border border-warm-200 flex items-center justify-between">
           <div>
-            <p className="text-xs text-charcoal-700 font-semibold">Harga Paket:</p>
-            <p className="text-lg font-black text-charcoal">{packageItem.price}</p>
+            <p className="text-xs text-charcoal-700 font-semibold">
+              {isPrintOnly ? 'Estimasi Total Biaya:' : 'Harga Paket:'}
+            </p>
+            <p className="text-lg font-black text-charcoal">
+              {isPrintOnly ? formatRupiah(printTotalBiaya) : packageItem.price}
+            </p>
           </div>
           <div className="text-right text-[11px] text-charcoal-700">
             <p>⏱ {packageItem.duration}</p>
-            <p>👥 {packageItem.capacity || packageItem.people}</p>
+            <p>👥 {isPrintOnly ? `${totalSets} Set Total` : (packageItem.capacity || packageItem.people)}</p>
           </div>
         </div>
 
         {/* Form Inputs */}
         <form onSubmit={handleSendWa} className="mt-3.5 space-y-3.5">
-          
-          {/* Customer Info (Name & WhatsApp) */}
+          {/* Identitas Pemesan */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div>
-              <label htmlFor="booking-name" className="block text-xs font-bold text-charcoal mb-1 flex items-center gap-1">
-                <User className="size-3.5 text-warm-800" aria-hidden="true" />
-                <span>Nama Lengkap:</span>
-                <span className="text-red-500">*</span>
+              <label htmlFor="customer-name" className="block text-xs font-bold text-charcoal mb-1 flex items-center gap-1">
+                <User className="size-3 text-charcoal-600" />
+                <span>Nama Pemesan:</span>
               </label>
               <input
-                id="booking-name"
+                id="customer-name"
                 type="text"
-                required
-                placeholder="Contoh: Rian Pratama"
+                placeholder="Nama Anda"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal placeholder:text-charcoal-400 focus:outline-none focus:ring-2 focus:ring-charcoal/20 focus:bg-white transition-all"
               />
             </div>
-
             <div>
-              <label htmlFor="booking-phone" className="block text-xs font-bold text-charcoal mb-1 flex items-center gap-1">
-                <Phone className="size-3.5 text-warm-800" aria-hidden="true" />
-                <span>No. WhatsApp:</span>
-                <span className="text-red-500">*</span>
+              <label htmlFor="customer-phone" className="block text-xs font-bold text-charcoal mb-1 flex items-center gap-1">
+                <Phone className="size-3 text-charcoal-600" />
+                <span>Nomor WhatsApp:</span>
               </label>
               <input
-                id="booking-phone"
+                id="customer-phone"
                 type="tel"
-                required
                 placeholder="Contoh: 081234567890"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
@@ -180,7 +236,7 @@ export default function BookingModal({ packageItem, onClose }) {
             <label className="block text-xs font-bold text-charcoal mb-1.5 flex items-center justify-between">
               <span className="flex items-center gap-1">
                 <MapPin className="size-3.5 text-warm-800" aria-hidden="true" />
-                <span>Pilih Cabang Studio:</span>
+                <span>Pilih Cabang Pengambilan / Studio:</span>
               </span>
               <span className="text-[10px] text-emerald-700 font-bold">{currentBranch.hours}</span>
             </label>
@@ -224,8 +280,8 @@ export default function BookingModal({ packageItem, onClose }) {
             </div>
           </div>
 
-          {/* Pas Foto Specific: Set Cetak & Opsi Warna */}
-          {isPasFoto && (
+          {/* Standard Single Pas Foto Selection (For studio session packages) */}
+          {isPasFoto && !isPrintOnly && (
             <div className="p-3 bg-warm-50/90 rounded-2xl border border-warm-200 space-y-2.5">
               <div>
                 <label className="block text-xs font-bold text-charcoal mb-1.5 flex items-center justify-between">
@@ -233,12 +289,7 @@ export default function BookingModal({ packageItem, onClose }) {
                   <span className="text-[10px] text-warm-800 font-bold">Bebas Pilih</span>
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                  {[
-                    { code: 'Set A', detail: '4x6 = 4 lembar' },
-                    { code: 'Set B', detail: '4x6 = 2 lbr & 3x4 = 4 lbr' },
-                    { code: 'Set C', detail: '3x4 = 8 lembar' },
-                    { code: 'Set D', detail: '3x4 = 4 lbr & 2x3 = 8 lbr' }
-                  ].map((s) => {
+                  {PAS_FOTO_SETS.map((s) => {
                     const val = `${s.code}: ${s.detail}`;
                     const isSelected = pasFotoSet === val;
                     return (
@@ -290,18 +341,115 @@ export default function BookingModal({ packageItem, onClose }) {
             </div>
           )}
 
-          {/* Print Only Specific: Speed & Quantity Options */}
+          {/* Custom Multi-Item Pas Foto Print Configurator (If isPrintOnly) */}
           {isPrintOnly && (
             <div className="space-y-3 pt-1">
               {/* WhatsApp Document Guide Box */}
               <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 flex items-start gap-2.5">
                 <Check className="size-4 text-emerald-700 shrink-0 mt-0.5" aria-hidden="true" />
                 <div className="leading-relaxed">
-                  <p className="font-bold text-emerald-900">Cara Mudah Kirim File via WA:</p>
+                  <p className="font-bold text-emerald-900">Cara Kirim File via WA:</p>
                   <p className="text-[11px] text-emerald-800 mt-0.5">
-                    Setelah menekan tombol hijau di bawah, chat WhatsApp studio akan otomatis terbuka. Cukup <strong>lampirkan file foto Anda sebagai 'Dokumen'</strong> agar resolusi tetap tajam & tidak pecah.
+                    Nanti di chat WhatsApp, cukup <strong>lampirkan file foto Anda sebagai 'Dokumen'</strong> agar resolusi tetap tajam & tidak pecah.
                   </p>
                 </div>
+              </div>
+
+              {/* Multi-Item Editor in Modal */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-charcoal">
+                    Rincian Kombinasi Set & Warna:
+                  </label>
+                  <span className="text-[10px] font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                    Total {totalSets} Set
+                  </span>
+                </div>
+
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                  {customOrderItems.map((item, idx) => {
+                    const setObj = PAS_FOTO_SETS.find((s) => s.id === item.setId) || PAS_FOTO_SETS[0];
+                    return (
+                      <div key={item.id} className="p-2.5 bg-warm-50 rounded-xl border border-warm-200 text-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-charcoal">#{idx + 1}. {setObj.code} ({setObj.detail})</span>
+                          {customOrderItems.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveItem(item.id)}
+                              className="text-red-500 hover:text-red-700 p-1"
+                              aria-label="Hapus baris ini"
+                            >
+                              <Trash2 className="size-3.5" />
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-12 gap-1.5 items-center">
+                          {/* Set select */}
+                          <div className="col-span-5">
+                            <select
+                              value={item.setId}
+                              onChange={(e) => handleUpdateItemSet(item.id, e.target.value)}
+                              className="w-full text-[11px] font-bold bg-white text-charcoal border border-warm-300 rounded-lg px-2 py-1"
+                            >
+                              {PAS_FOTO_SETS.map((s) => (
+                                <option key={s.id} value={s.id}>{s.code} ({s.shortTitle})</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Color select */}
+                          <div className="col-span-4 flex gap-1">
+                            {['Warna', 'Hitam Putih'].map((col) => (
+                              <button
+                                key={col}
+                                type="button"
+                                onClick={() => handleUpdateItemColor(item.id, col)}
+                                className={`text-[10px] font-bold py-1 px-1.5 rounded-lg border flex-1 text-center transition-all ${
+                                  item.color === col
+                                    ? 'bg-charcoal text-white border-charcoal'
+                                    : 'bg-white text-charcoal border-warm-200'
+                                }`}
+                              >
+                                {col === 'Warna' ? 'Warna' : 'B/W'}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Qty stepper */}
+                          <div className="col-span-3 flex items-center justify-between bg-white border border-warm-300 rounded-lg p-0.5">
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateItemQty(item.id, -1)}
+                              disabled={item.qty <= 1}
+                              className="size-5 rounded flex items-center justify-center bg-warm-100 hover:bg-warm-200 text-charcoal disabled:opacity-30"
+                            >
+                              <Minus className="size-2.5" />
+                            </button>
+                            <span className="font-mono font-bold text-[11px]">{item.qty}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateItemQty(item.id, 1)}
+                              className="size-5 rounded flex items-center justify-center bg-warm-100 hover:bg-warm-200 text-charcoal"
+                            >
+                              <Plus className="size-2.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddItem}
+                  className="mt-1.5 text-xs font-bold text-charcoal flex items-center gap-1 hover:underline"
+                >
+                  <Plus className="size-3.5" />
+                  <span>+ Tambah Set Lainnya</span>
+                </button>
               </div>
 
               {/* Speed Option */}
@@ -310,23 +458,20 @@ export default function BookingModal({ packageItem, onClose }) {
                   Pilihan Kecepatan Cetak:
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                  {[
-                    { label: '⚡ Express (± 30 Menit)', val: 'Express 30 Menit (Rp 10.000 / set)', desc: 'Langsung jadi di studio' },
-                    { label: '🕒 Reguler (H+1 Selesai)', val: 'Reguler H+1 (Rp 8.000 / set)', desc: 'Selesai keesokan hari' }
-                  ].map((sp) => {
-                    const isSelected = printSpeed === sp.val;
+                  {SPEED_OPTIONS.map((sp) => {
+                    const isSelected = printSpeed.includes(sp.id === 'express' ? '10.000' : '8.000');
                     return (
                       <button
                         type="button"
-                        key={sp.label}
-                        onClick={() => setPrintSpeed(sp.val)}
+                        key={sp.id}
+                        onClick={() => setPrintSpeed(`${sp.name} (${sp.priceStr} / set)`)}
                         className={`tap-bounce p-2.5 rounded-xl border text-left text-xs transition-all ${
                           isSelected
                             ? 'bg-charcoal text-white border-charcoal font-bold shadow-xs'
                             : 'bg-white text-charcoal border-warm-200 hover:bg-warm-100'
                         }`}
                       >
-                        <div className="font-bold">{sp.label}</div>
+                        <div className="font-bold">{sp.name}</div>
                         <div className={`text-[10px] ${isSelected ? 'text-warm-200' : 'text-charcoal-600'}`}>{sp.desc}</div>
                       </button>
                     );
@@ -334,41 +479,18 @@ export default function BookingModal({ packageItem, onClose }) {
                 </div>
               </div>
 
-              {/* Quantity Selector */}
-              <div>
-                <label className="block text-xs font-bold text-charcoal mb-1">
-                  Jumlah Pesanan (Berapa Set):
-                </label>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {['1 Set', '2 Set', '3 Set', '4 Set', '5 Set', '10 Set'].map((q) => (
-                    <button
-                      type="button"
-                      key={q}
-                      onClick={() => setQuantity(q)}
-                      className={`tap-bounce py-1.5 px-3 rounded-xl text-xs font-bold border transition-all ${
-                        quantity === q
-                          ? 'bg-charcoal text-white border-charcoal shadow-xs'
-                          : 'bg-white text-charcoal border-warm-200 hover:bg-warm-100'
-                      }`}
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Live Total Biaya Box */}
               <div className="p-3.5 bg-gradient-to-br from-charcoal-900 to-charcoal text-white rounded-2xl flex items-center justify-between border-2 border-amber-400/50 shadow-soft">
                 <div>
                   <span className="text-[10px] text-warm-300 font-bold uppercase tracking-wider block">
-                    Total Biaya Cetak:
+                    Total Biaya Keseluruhan:
                   </span>
                   <span className="text-xl font-black text-amber-300 font-mono tracking-tight">
                     {formatRupiah(printTotalBiaya)}
                   </span>
                 </div>
                 <div className="text-right text-[11px] text-warm-200">
-                  <span className="font-bold text-white block">{quantity}</span>
+                  <span className="font-bold text-white block">{totalSets} Set Total</span>
                   <span>@ {formatRupiah(unitPrice)} / set</span>
                 </div>
               </div>
@@ -379,24 +501,24 @@ export default function BookingModal({ packageItem, onClose }) {
           <div>
             <label htmlFor="booking-date" className="block text-xs font-bold text-charcoal mb-1 flex items-center gap-1">
               <Calendar className="size-3.5 text-warm-800" aria-hidden="true" />
-              <span>{isPrintOnly ? 'Rencana Tanggal Pengambilan Foto:' : 'Rencana Tanggal Sesi Foto:'}</span>
+              <span>{isPrintOnly ? 'Rencana Tanggal Ambil Hasil Cetak:' : 'Pilih Rencana Tanggal Foto:'}</span>
             </label>
             <input
               id="booking-date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-charcoal/20"
+              className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-charcoal/20 focus:bg-white transition-all"
             />
           </div>
 
-          {/* 3. DYNAMIC TIME SLOTS (Only for Photoshoot Sessions) */}
+          {/* 3. Time Slots (Only for Studio Session Booking) */}
           {!isPrintOnly && (
             <div>
-              <label className="block text-xs font-bold text-charcoal mb-1.5 flex items-center justify-between">
+              <label className="block text-xs font-bold text-charcoal mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1">
                   <Clock className="size-3.5 text-warm-800" aria-hidden="true" />
-                  <span>Pilih Jam Sesi ({currentBranch.name}):</span>
+                  <span>Pilih Jam Sesi yang Tersedia:</span>
                 </span>
                 <span className="text-[10px] text-charcoal-700">Interval 30 menit</span>
               </label>
@@ -451,7 +573,7 @@ export default function BookingModal({ packageItem, onClose }) {
               <input
                 id="booking-notes"
                 type="text"
-                placeholder={isPrintOnly ? "misal: tolong background ganti biru / merah" : "misal: wisuda UNDIP, bawa toga"}
+                placeholder={isPrintOnly ? "misal: tolong background ganti biru / merah, atau ada 2 foto berbeda" : "misal: wisuda UNDIP, bawa toga"}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-charcoal/20"
