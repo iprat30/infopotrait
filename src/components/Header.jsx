@@ -29,7 +29,7 @@ export default function Header() {
             POTRAIT
           </span>
           <span className="text-[10px] md:text-[11px] font-bold tracking-[0.3em] uppercase text-warm-800 -mt-1 block">
-            Digital Studio & Selfi
+            Digital Studio & Self Photo
           </span>
         </div>
 

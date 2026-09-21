@@ -39,3 +39,33 @@
 .tap-bounce:active {
   transform: scale(0.98);
 }
+
+/* Eye-catching shimmer animation across the button */
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  50%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer-sweep 3s ease-in-out infinite;
+}
+
+/* Subtle gentle floating pulse for CTA */
+@keyframes gentle-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 10px 25px -5px rgba(37, 211, 102, 0.4), 0 8px 10px -6px rgba(37, 211, 102, 0.2);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 15px 30px -5px rgba(37, 211, 102, 0.6), 0 10px 15px -5px rgba(37, 211, 102, 0.4);
+  }
+}
+
+.animate-cta-pulse {
+  animation: gentle-pulse 2.2s ease-in-out infinite;
+}

@@ -29,7 +29,7 @@ export default function Footer() {
             POTRAIT
           </span>
           <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-warm-300">
-            Digital Foto Studio & Selfi
+            Digital Foto Studio & Self Photo
           </span>
           <p className="text-xs text-warm-200 mt-1 max-w-sm mx-auto">
             Studio foto modern di Semarang: BQ Square Tembalang, Prof. Soedarto & Sekaran Gunungpati.
