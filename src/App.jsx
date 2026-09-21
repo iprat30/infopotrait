@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import NavigationSwitcher from './components/NavigationSwitcher';
 import PortfolioTicker from './components/PortfolioTicker';
-import CompactPromo from './components/CompactPromo';
 import CategoryTabs from './components/CategoryTabs';
 import PackageCard from './components/PackageCard';
 import PortfolioGallery from './components/PortfolioGallery';
@@ -12,13 +11,15 @@ import FaqSection from './components/FaqSection';
 import Footer from './components/Footer';
 import FloatingCta from './components/FloatingCta';
 import BookingModal from './components/BookingModal';
+import PromoHookModal from './components/PromoHookModal';
+import PromoDetailModal from './components/PromoDetailModal';
 import { PACKAGES_DATA } from './data/packagesData';
-import { PlusCircle, CheckCircle2 } from 'lucide-react';
+import { PlusCircle, CheckCircle2, Flame } from 'lucide-react';
 
 // Categories that trigger faster promo reveal (high-intent visitors)
 const HIGH_INTENT_CATEGORIES = ['wisuda-indoor', 'wisuda-outdoor', 'group'];
-const DEFAULT_REVEAL_DELAY = 35_000;  // 35 sec for normal browsing
-const INTENT_REVEAL_DELAY  = 15_000;  // 15 sec for wisuda/family viewers
+const DEFAULT_REVEAL_DELAY = 30_000;  // 30 sec for normal browsing
+const INTENT_REVEAL_DELAY  = 12_000;  // 12 sec for wisuda/family viewers
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('packages');
@@ -26,39 +27,43 @@ export default function App() {
   const [bookingPackage, setBookingPackage] = useState(null);
   const [showAddOns, setShowAddOns] = useState(false);
 
-  // Promo reveal state — hidden on first load, shown after delay
-  const [promoVisible, setPromoVisible] = useState(false);
+  // Pop-up Promo Funnel:
+  // Step 1: Hook Pop-up on top of current page
+  // Step 2: Full Detail Promo Modal after clicking CTA
+  const [showPromoHook, setShowPromoHook] = useState(false);
+  const [showPromoDetail, setShowPromoDetail] = useState(false);
   const [promoDismissed, setPromoDismissed] = useState(false);
   const promoTimerRef = useRef(null);
-  const promoRevealedRef = useRef(false); // ensure we only fire once per session
+  const promoTriggeredRef = useRef(false);
 
-  // Smart reveal: watch selectedCategory and activeTab
+  // Smart reveal: pops up after visitor browses for a while
   useEffect(() => {
-    if (promoRevealedRef.current || promoDismissed) return;
+    if (promoTriggeredRef.current || promoDismissed) return;
 
-    // Clear any existing timer
     clearTimeout(promoTimerRef.current);
-
-    if (activeTab !== 'packages') return;
 
     const delay = HIGH_INTENT_CATEGORIES.includes(selectedCategory)
       ? INTENT_REVEAL_DELAY
       : DEFAULT_REVEAL_DELAY;
 
     promoTimerRef.current = setTimeout(() => {
-      if (!promoRevealedRef.current) {
-        promoRevealedRef.current = true;
-        setPromoVisible(true);
+      if (!promoTriggeredRef.current) {
+        promoTriggeredRef.current = true;
+        setShowPromoHook(true);
       }
     }, delay);
 
     return () => clearTimeout(promoTimerRef.current);
-  }, [selectedCategory, activeTab, promoDismissed]);
+  }, [selectedCategory, promoDismissed]);
 
-  const handleDismissPromo = () => {
-    setPromoVisible(false);
+  const handleClosePromoHook = () => {
+    setShowPromoHook(false);
     setPromoDismissed(true);
-    clearTimeout(promoTimerRef.current);
+  };
+
+  const handleClaimPromoCta = () => {
+    setShowPromoHook(false);
+    setShowPromoDetail(true);
   };
 
 
@@ -85,13 +90,6 @@ export default function App() {
                 setShowAddOns(false);
               }
             }}
-          />
-
-          {/* Smart FOMO Promo — hidden on arrival, revealed after time-based + intent trigger */}
-          <CompactPromo
-            visible={promoVisible}
-            selectedCategory={selectedCategory}
-            onDismiss={handleDismissPromo}
           />
 
 
@@ -228,6 +226,35 @@ export default function App() {
           onClose={() => setBookingPackage(null)}
         />
       )}
+
+      {/* Pop-up Promo Step 1: Hook Pop-up on top of the current page */}
+      <PromoHookModal
+        isOpen={showPromoHook}
+        selectedCategory={selectedCategory}
+        onClose={handleClosePromoHook}
+        onClaimPromo={handleClaimPromoCta}
+      />
+
+      {/* Pop-up Promo Step 2: Full Detail Promo Modal */}
+      <PromoDetailModal
+        isOpen={showPromoDetail}
+        onClose={() => setShowPromoDetail(false)}
+        onBookWithSchedule={(promoPkg) => setBookingPackage(promoPkg)}
+      />
+
+      {/* Subtle Floating Promo Chip (accessible if dismissed or after viewing) */}
+      {promoDismissed && !showPromoHook && !showPromoDetail && (
+        <button
+          type="button"
+          onClick={() => setShowPromoDetail(true)}
+          className="fixed bottom-20 right-3.5 z-30 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-charcoal text-[11px] font-black py-2 px-3.5 rounded-full shadow-elevated border-2 border-white/60 flex items-center gap-1.5 animate-bounce tap-bounce cursor-pointer"
+          aria-label="Buka Promo Wisuda Hemat Rp299k"
+        >
+          <Flame className="size-3.5 fill-charcoal text-charcoal" />
+          <span>Promo Rp299k</span>
+        </button>
+      )}
     </div>
+
   );
 }
