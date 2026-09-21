@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Printer, Check, Plus, Minus, MessageCircle, Sparkles,
-  Zap, Clock, FileText, ArrowRight, Trash2, ShoppingCart, RefreshCw
+  Zap, Clock, FileText, ArrowRight, Trash2, ShoppingCart, RefreshCw, Layers
 } from 'lucide-react';
 import { MAIN_WHATSAPP } from '../data/branchesData';
 
@@ -12,6 +12,7 @@ export const PAS_FOTO_SETS = [
     detail: '4x6 = 4 lembar',
     shortTitle: '4x6 (4 lbr)',
     desc: 'Standar ijazah, wisuda & paspor',
+    sheets: { '4x6': 4, '3x4': 0, '2x3': 0 }
   },
   {
     id: 'set-b',
@@ -20,6 +21,7 @@ export const PAS_FOTO_SETS = [
     shortTitle: '4x6 (2 lbr) & 3x4 (4 lbr)',
     desc: 'Paling favorit untuk buku nikah & CPNS',
     popular: true,
+    sheets: { '4x6': 2, '3x4': 4, '2x3': 0 }
   },
   {
     id: 'set-c',
@@ -27,6 +29,7 @@ export const PAS_FOTO_SETS = [
     detail: '3x4 = 8 lembar',
     shortTitle: '3x4 (8 lbr)',
     desc: 'Standar registrasi kampus & berkas lamaran',
+    sheets: { '4x6': 0, '3x4': 8, '2x3': 0 }
   },
   {
     id: 'set-d',
@@ -34,6 +37,7 @@ export const PAS_FOTO_SETS = [
     detail: '3x4 = 4 lbr & 2x3 = 8 lbr',
     shortTitle: '3x4 (4 lbr) & 2x3 (8 lbr)',
     desc: 'Lengkap ukuran kecil untuk dokumen dinas',
+    sheets: { '4x6': 0, '3x4': 4, '2x3': 8 }
   }
 ];
 
@@ -56,6 +60,58 @@ export const SPEED_OPTIONS = [
   }
 ];
 
+// Helper to compute breakdown of sheets per size and color variant
+export function computeSheetsBreakdown(items) {
+  // breakdown: { '4x6': { 'Warna': 0, 'Hitam Putih': 0 }, ... }
+  const breakdown = {
+    '4x6': { 'Warna': 0, 'Hitam Putih': 0 },
+    '3x4': { 'Warna': 0, 'Hitam Putih': 0 },
+    '2x3': { 'Warna': 0, 'Hitam Putih': 0 },
+  };
+
+  let totalLembarAll = 0;
+
+  items.forEach((it) => {
+    const s = PAS_FOTO_SETS.find((x) => x.id === it.setId) || PAS_FOTO_SETS[0];
+    const qty = it.qty || 0;
+    const colorKey = it.color === 'Hitam Putih' ? 'Hitam Putih' : 'Warna';
+
+    if (s.sheets['4x6']) {
+      const count = s.sheets['4x6'] * qty;
+      breakdown['4x6'][colorKey] += count;
+      totalLembarAll += count;
+    }
+    if (s.sheets['3x4']) {
+      const count = s.sheets['3x4'] * qty;
+      breakdown['3x4'][colorKey] += count;
+      totalLembarAll += count;
+    }
+    if (s.sheets['2x3']) {
+      const count = s.sheets['2x3'] * qty;
+      breakdown['2x3'][colorKey] += count;
+      totalLembarAll += count;
+    }
+  });
+
+  // Filter only sizes that have > 0 sheets
+  const activeSizes = Object.entries(breakdown)
+    .filter(([_, colors]) => colors['Warna'] > 0 || colors['Hitam Putih'] > 0)
+    .map(([size, colors]) => {
+      const parts = [];
+      if (colors['Warna'] > 0) parts.push(`${colors['Warna']} lbr Warna`);
+      if (colors['Hitam Putih'] > 0) parts.push(`${colors['Hitam Putih']} lbr B/W`);
+      return {
+        size,
+        warna: colors['Warna'],
+        bw: colors['Hitam Putih'],
+        totalForSize: colors['Warna'] + colors['Hitam Putih'],
+        label: `${size}: ${parts.join(', ')}`
+      };
+    });
+
+  return { breakdown, activeSizes, totalLembarAll };
+}
+
 export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
   // Items array: each item is { id, setId, color: 'Warna' | 'Hitam Putih', qty: number }
   const [orderItems, setOrderItems] = useState([
@@ -70,6 +126,9 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
   const unitPrice = selectedSpeed.price;
   const totalSets = orderItems.reduce((acc, it) => acc + (it.qty || 0), 0);
   const totalBiaya = unitPrice * totalSets;
+
+  // Breakdown of sheets
+  const sheetsSummary = useMemo(() => computeSheetsBreakdown(orderItems), [orderItems]);
 
   const formatRupiah = (num) => `Rp ${num.toLocaleString('id-ID')}`;
 
@@ -112,8 +171,7 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
     ]);
   };
 
-  // Quick preset from the user's prompt:
-  // "Set A - 2 set warna, Set B 1x hitam putih, Set C 1 kali warna, D 1x kali hitam putih"
+  // Quick preset: Set A (2x Warna), Set B (1x B/W), Set C (1x Warna), Set D (1x B/W)
   const handleApplyExampleMix = () => {
     setOrderItems([
       { id: 'mix-1', setId: 'set-a', color: 'Warna', qty: 2 },
@@ -140,17 +198,27 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
       return `${idx + 1}. ${setObj.code} (${setObj.detail}) [${it.color.toUpperCase()}] × ${it.qty} Set = ${formatRupiah(subtotal)}`;
     }).join('\n');
 
+    const sheetsLines = sheetsSummary.activeSizes.map((s) => {
+      const parts = [];
+      if (s.warna > 0) parts.push(`${s.warna} lembar Warna`);
+      if (s.bw > 0) parts.push(`${s.bw} lembar Hitam Putih`);
+      return `• Ukuran ${s.size}: ${parts.join(' & ')} (Total ${s.totalForSize} lbr)`;
+    }).join('\n');
+
     const text = [
       `*ORDER CETAK PAS FOTO (FILE SUDAH ADA)*`,
       `----------------------------------------`,
-      `*Rincian Pesanan Cetak:*`,
+      `*Rincian Pesanan Set:* `,
       itemsSummary,
       `----------------------------------------`,
+      `*Total Lembar Foto yang Didapat (${sheetsSummary.totalLembarAll} Lembar):*`,
+      sheetsLines,
+      `----------------------------------------`,
       `Kecepatan Cetak: ${selectedSpeed.name} (@ ${selectedSpeed.priceStr} / set)`,
-      `Total Jumlah: ${totalSets} Set`,
+      `Total Pesanan: ${totalSets} Set`,
       `*TOTAL BIAYA: ${formatRupiah(totalBiaya)}*`,
       ``,
-      `Halo admin Potrait Studio, saya ingin cetak pas foto dari file yang sudah saya punya dengan rincian kombinasi di atas.`,
+      `Halo admin Potrait Studio, saya ingin cetak pas foto dari file yang sudah saya punya dengan rincian kombinasi di atas. Total lembar dan ukuran sudah sesuai kebutuhan saya.`,
       `File foto akan segera saya kirimkan ke chat WA ini (dikirim sebagai Dokumen agar tidak terkompres). Mohon segera diproses ya min, terima kasih!`
     ].join('\n');
 
@@ -201,10 +269,10 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
             </span>
           </div>
           <h3 className="text-base sm:text-lg font-black text-charcoal tracking-tight">
-            Kombinasi Cetak Pas Foto (Multi-Set)
+            Kombinasi Cetak Pas Foto & Kalkulator Lembar
           </h3>
           <p className="text-xs text-charcoal-700 mt-0.5">
-            Bebas pilih kombinasi Set A, B, C, D dengan varian Warna / Hitam Putih dan jumlah set berbeda
+            Pilih kombinasi Set A, B, C, D — Rincian total lembar foto per ukuran otomatis terhitung real-time!
           </p>
         </div>
 
@@ -233,7 +301,7 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
       {/* Guide Card: Ukuran & Penjelasan Paket Set */}
       <div className="p-3 bg-warm-50/80 rounded-2xl border border-warm-200">
         <span className="text-[11px] font-black text-charcoal uppercase tracking-wider block mb-1.5">
-          Referensi Pilihan Set Cetak:
+          Referensi Standar Lembar Per Set:
         </span>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
           {PAS_FOTO_SETS.map((s) => (
@@ -253,7 +321,7 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
             <span className="size-5 rounded-full bg-charcoal text-white text-[11px] font-black flex items-center justify-center">
               1
             </span>
-            <span>Rincian Set & Varian yang Dipesan:</span>
+            <span>Atur Pilihan Set & Varian Warna:</span>
           </label>
           <span className="text-xs font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
             {orderItems.length} Pilihan • Total {totalSets} Set
@@ -277,6 +345,16 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
             {orderItems.map((item, index) => {
               const currentSetObj = PAS_FOTO_SETS.find((s) => s.id === item.setId) || PAS_FOTO_SETS[0];
               const subtotal = item.qty * unitPrice;
+
+              // Sheets for this specific row
+              const rowSheets4x6 = (currentSetObj.sheets['4x6'] || 0) * item.qty;
+              const rowSheets3x4 = (currentSetObj.sheets['3x4'] || 0) * item.qty;
+              const rowSheets2x3 = (currentSetObj.sheets['2x3'] || 0) * item.qty;
+
+              const rowSheetParts = [];
+              if (rowSheets4x6 > 0) rowSheetParts.push(`4x6: ${rowSheets4x6} lbr`);
+              if (rowSheets3x4 > 0) rowSheetParts.push(`3x4: ${rowSheets3x4} lbr`);
+              if (rowSheets2x3 > 0) rowSheetParts.push(`2x3: ${rowSheets2x3} lbr`);
 
               return (
                 <div
@@ -396,6 +474,17 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
                       </div>
                     </div>
                   </div>
+
+                  {/* Inline Sheets Badge for This Row */}
+                  <div className="flex items-center justify-between text-[10.5px] pt-1 border-t border-warm-200/50 text-charcoal-600">
+                    <span className="flex items-center gap-1">
+                      <Layers className="size-3 text-warm-800" />
+                      <span>Didapat dari baris ini:</span>
+                    </span>
+                    <span className="font-bold text-charcoal bg-white px-2 py-0.5 rounded-md border border-warm-200">
+                      {rowSheetParts.join(' • ')} ({item.color})
+                    </span>
+                  </div>
                 </div>
               );
             })}
@@ -417,6 +506,61 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
           </span>
         </div>
       </div>
+
+      {/* ── LIVE PHOTO SHEETS BREAKDOWN CARD (JUMLAH LEMBAR REAL-TIME) ── */}
+      {sheetsSummary.activeSizes.length > 0 && (
+        <div className="p-3.5 bg-gradient-to-r from-amber-50 via-warm-50 to-emerald-50 rounded-2xl border-2 border-amber-300/80 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="size-5 rounded-full bg-amber-500 text-white flex items-center justify-center">
+                <Layers className="size-3" />
+              </span>
+              <span className="text-xs font-black text-charcoal uppercase tracking-wider">
+                Total Lembar Foto yang Anda Dapatkan:
+              </span>
+            </div>
+            <span className="text-xs font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-lg">
+              {sheetsSummary.totalLembarAll} Lembar Total
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+            {['4x6', '3x4', '2x3'].map((sizeKey) => {
+              const data = sheetsSummary.activeSizes.find((s) => s.size === sizeKey);
+              if (!data) return null;
+
+              return (
+                <div key={sizeKey} className="bg-white rounded-xl p-2.5 border border-warm-200 shadow-2xs space-y-1">
+                  <div className="flex items-baseline justify-between">
+                    <span className="font-black text-sm text-charcoal">Ukuran {sizeKey}</span>
+                    <span className="text-xs font-black text-amber-700 font-mono">
+                      {data.totalForSize} Lembar
+                    </span>
+                  </div>
+                  <div className="text-[11px] space-y-0.5 border-t border-warm-100 pt-1">
+                    {data.warna > 0 && (
+                      <div className="flex items-center justify-between text-charcoal-700">
+                        <span className="flex items-center gap-1">🌈 Cetak Warna:</span>
+                        <span className="font-bold font-mono text-emerald-700">{data.warna} lbr</span>
+                      </div>
+                    )}
+                    {data.bw > 0 && (
+                      <div className="flex items-center justify-between text-charcoal-700">
+                        <span className="flex items-center gap-1">⚪⚫ Hitam Putih:</span>
+                        <span className="font-bold font-mono text-charcoal-900">{data.bw} lbr</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="text-[10px] text-charcoal-600 font-medium">
+            💡 <em>Rincian di atas dihitung otomatis dari kombinasi set dan varian warna yang Anda atur.</em>
+          </p>
+        </div>
+      )}
 
       {/* ── STEP 2: KECEPATAN CETAK ── */}
       <div>
@@ -495,6 +639,27 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
             );
           })}
         </div>
+
+        {/* Lembar Summary Badge in Dark Box */}
+        {sheetsSummary.activeSizes.length > 0 && (
+          <div className="p-2.5 rounded-xl bg-amber-400/15 border border-amber-400/30 text-[11.5px] text-amber-200 space-y-1">
+            <div className="font-bold text-amber-300 flex items-center justify-between">
+              <span>Lembar Foto yang Didapat ({sheetsSummary.totalLembarAll} Lembar):</span>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[11px] text-white">
+              {sheetsSummary.activeSizes.map((s) => {
+                const parts = [];
+                if (s.warna > 0) parts.push(`${s.warna} Warna`);
+                if (s.bw > 0) parts.push(`${s.bw} B/W`);
+                return (
+                  <span key={s.size} className="bg-white/10 px-2 py-0.5 rounded-md font-mono">
+                    <strong className="text-amber-300">{s.size}</strong>: {parts.join(' + ')}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Grand Total */}
         <div className="flex items-baseline justify-between border-t border-white/15 pt-2">

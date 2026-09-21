@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { X, Calendar, MapPin, MessageCircle, Clock, Check, Info, User, Phone, Plus, Minus, Trash2 } from 'lucide-react';
+import { X, Calendar, MapPin, MessageCircle, Clock, Check, Info, User, Phone, Plus, Minus, Trash2, Layers } from 'lucide-react';
 import { BRANCHES_DATA, MAIN_WHATSAPP } from '../data/branchesData';
-import { PAS_FOTO_SETS, SPEED_OPTIONS } from './PasFotoPrintNavigator';
+import { PAS_FOTO_SETS, SPEED_OPTIONS, computeSheetsBreakdown } from './PasFotoPrintNavigator';
 
 export default function BookingModal({ packageItem, onClose }) {
   const [customerName, setCustomerName] = useState('');
@@ -41,6 +41,9 @@ export default function BookingModal({ packageItem, onClose }) {
   const totalSets = customOrderItems.reduce((acc, it) => acc + (it.qty || 0), 0);
   const printTotalBiaya = unitPrice * totalSets;
   const formatRupiah = (num) => `Rp ${num.toLocaleString('id-ID')}`;
+
+  // Real-time sheets breakdown
+  const sheetsSummary = useMemo(() => computeSheetsBreakdown(customOrderItems), [customOrderItems]);
 
   const handleUpdateItemQty = (id, delta) => {
     setCustomOrderItems((prev) =>
@@ -111,6 +114,13 @@ export default function BookingModal({ packageItem, onClose }) {
         return `${idx + 1}. ${s.code} (${s.detail}) [${it.color.toUpperCase()}] × ${it.qty} Set = ${formatRupiah(sub)}`;
       }).join('\n');
 
+      const sheetsList = sheetsSummary.activeSizes.map((s) => {
+        const parts = [];
+        if (s.warna > 0) parts.push(`${s.warna} lembar Warna`);
+        if (s.bw > 0) parts.push(`${s.bw} lembar Hitam Putih`);
+        return `• Ukuran ${s.size}: ${parts.join(' & ')} (Total ${s.totalForSize} lbr)`;
+      }).join('\n');
+
       text = [
         `*ORDER CETAK PAS FOTO (FILE SUDAH ADA)*`,
         customerName ? `Nama Pemesan: ${customerName}` : null,
@@ -119,6 +129,9 @@ export default function BookingModal({ packageItem, onClose }) {
         `*Rincian Kombinasi Cetak:*`,
         itemsList,
         `----------------------------------------`,
+        `*Total Lembar yang Didapat (${sheetsSummary.totalLembarAll} Lembar):*`,
+        sheetsList,
+        `----------------------------------------`,
         `Kecepatan Cetak: ${printSpeed}`,
         `Total Pesanan: ${totalSets} Set`,
         `*TOTAL BIAYA: ${formatRupiah(printTotalBiaya)}*`,
@@ -126,7 +139,7 @@ export default function BookingModal({ packageItem, onClose }) {
         date ? `Rencana Ambil Tanggal: ${date}` : null,
         notes ? `Catatan Tambahan: ${notes}` : null,
         ``,
-        `Halo admin, saya ingin cetak pas foto dari file yang sudah saya miliki dengan rincian di atas. File foto akan segera saya kirimkan via WhatsApp ini (sebagai Dokumen agar resolusi tidak pecah). Mohon segera diproses ya min, terima kasih!`
+        `Halo admin, saya ingin cetak pas foto dari file yang sudah saya miliki dengan rincian kombinasi dan total lembar di atas. File foto akan segera saya kirimkan via WhatsApp ini (sebagai Dokumen agar resolusi tidak pecah). Mohon segera diproses ya min, terima kasih!`
       ].filter(Boolean).join('\n');
     } else {
       text = [
@@ -193,7 +206,7 @@ export default function BookingModal({ packageItem, onClose }) {
           </div>
           <div className="text-right text-[11px] text-charcoal-700">
             <p>⏱ {packageItem.duration}</p>
-            <p>👥 {isPrintOnly ? `${totalSets} Set Total` : (packageItem.capacity || packageItem.people)}</p>
+            <p>👥 {isPrintOnly ? `${totalSets} Set (${sheetsSummary.totalLembarAll} Lembar)` : (packageItem.capacity || packageItem.people)}</p>
           </div>
         </div>
 
@@ -452,6 +465,33 @@ export default function BookingModal({ packageItem, onClose }) {
                 </button>
               </div>
 
+              {/* Real-time Lembar Breakdown in Modal */}
+              {sheetsSummary.activeSizes.length > 0 && (
+                <div className="p-2.5 bg-amber-50/90 rounded-xl border border-amber-200 text-xs space-y-1">
+                  <div className="flex items-center justify-between text-[11.5px] font-bold text-charcoal">
+                    <span className="flex items-center gap-1">
+                      <Layers className="size-3.5 text-amber-700" />
+                      <span>Rincian Total Lembar Foto yang Didapat:</span>
+                    </span>
+                    <span className="text-amber-800 font-black">{sheetsSummary.totalLembarAll} Lembar</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+                    {sheetsSummary.activeSizes.map((s) => {
+                      const parts = [];
+                      if (s.warna > 0) parts.push(`${s.warna} Warna`);
+                      if (s.bw > 0) parts.push(`${s.bw} B/W`);
+                      return (
+                        <div key={s.size} className="bg-white p-1.5 rounded-lg border border-amber-200/80 text-[10.5px]">
+                          <span className="font-black text-charcoal block">{s.size}</span>
+                          <span className="text-amber-700 font-bold block">{s.totalForSize} lbr</span>
+                          <span className="text-[9.5px] text-charcoal-500 block leading-tight">{parts.join(', ')}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Speed Option */}
               <div>
                 <label className="block text-xs font-bold text-charcoal mb-1.5">
@@ -490,7 +530,7 @@ export default function BookingModal({ packageItem, onClose }) {
                   </span>
                 </div>
                 <div className="text-right text-[11px] text-warm-200">
-                  <span className="font-bold text-white block">{totalSets} Set Total</span>
+                  <span className="font-bold text-white block">{totalSets} Set ({sheetsSummary.totalLembarAll} Lembar)</span>
                   <span>@ {formatRupiah(unitPrice)} / set</span>
                 </div>
               </div>
