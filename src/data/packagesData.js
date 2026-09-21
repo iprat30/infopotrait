@@ -386,11 +386,12 @@ export const PACKAGES_DATA = {
       { name: "Ganti Baju ID Personal", price: "Rp 50.000 / baju" }
     ],
     setOptions: [
-      "Set A: 4 pcs ukuran 4x6 cm",
-      "Set B: 2 pcs 4x6 cm + 4 pcs 3x4 cm",
-      "Set C: 8 pcs ukuran 3x4 cm",
-      "Set D: 4 pcs 3x4 cm + 8 pcs 2x3 cm"
-    ]
+      { code: "Set A", detail: "4x6 = 4 lembar" },
+      { code: "Set B", detail: "4x6 = 2 lembar & 3x4 = 4 lembar" },
+      { code: "Set C", detail: "3x4 = 8 lembar" },
+      { code: "Set D", detail: "3x4 = 4 lembar & 2x3 = 8 lembar" }
+    ],
+    colorNote: "Opsi cetak: Bebas pilih Cetak Warna atau Cetak Hitam Putih (B/W)"
   },
 
   // 4. SELF PHOTO

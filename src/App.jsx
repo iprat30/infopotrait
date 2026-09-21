@@ -139,19 +139,38 @@ export default function App() {
                   />
                 ))}
 
-                {/* Special Pas Foto Set Options */}
+                {/* Special Pas Foto Set Options & Color Options */}
                 {selectedCategory === 'pasfoto' && currentCategoryData?.setOptions && (
-                  <div className="bg-white rounded-2xl p-4 border border-warm-200 text-xs shadow-soft">
-                    <p className="font-bold text-charcoal mb-2 flex items-center gap-1.5">
-                      <CheckCircle2 className="size-4 text-emerald-600 shrink-0" aria-hidden="true" />
-                      <span>Pilihan Set Cetak Pas Foto (Bebas Pilih):</span>
-                    </p>
-                    <div className="grid grid-cols-2 gap-1.5 text-[11px] text-charcoal">
+                  <div className="bg-white rounded-2xl p-4 border border-warm-200 text-xs shadow-soft space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="font-extrabold text-charcoal flex items-center gap-1.5">
+                        <CheckCircle2 className="size-4 text-emerald-600 shrink-0" aria-hidden="true" />
+                        <span>Pilihan Paket Cetak Pas Foto (Bebas Pilih):</span>
+                      </p>
+                      <span className="text-[10px] font-bold bg-warm-100 text-charcoal px-2 py-0.5 rounded-full">
+                        Set A - D
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {currentCategoryData.setOptions.map((opt, oIdx) => (
-                        <div key={oIdx} className="bg-warm-50 p-2 rounded-lg border border-warm-100">
-                          {opt}
+                        <div key={oIdx} className="bg-warm-50/80 p-2.5 rounded-xl border border-warm-200 flex items-center justify-between">
+                          <span className="font-black text-xs text-charcoal bg-white px-2 py-0.5 rounded-md border border-warm-200 shadow-2xs">
+                            {opt.code}
+                          </span>
+                          <span className="font-bold text-[11px] text-charcoal-700">
+                            {opt.detail}
+                          </span>
                         </div>
                       ))}
+                    </div>
+
+                    {/* Color Options Highlight */}
+                    <div className="p-2.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 flex items-center gap-2 text-[11px] text-amber-950 font-medium">
+                      <span className="size-2 rounded-full bg-amber-500 shrink-0" />
+                      <span>
+                        <strong>Opsi Cetak:</strong> Bebas pilih <strong>Cetak Warna</strong> atau <strong>Cetak Hitam Putih (B/W)</strong> sesuai kebutuhan resmi instansi/buku nikah/ijazah.
+                      </span>
                     </div>
                   </div>
                 )}

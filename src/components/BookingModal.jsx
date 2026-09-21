@@ -6,7 +6,10 @@ export default function BookingModal({ packageItem, onClose }) {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const isSelfPhoto = packageItem?.id?.startsWith('selfi') || packageItem?.name?.toLowerCase().includes('self photo');
+  const isPasFoto = packageItem?.id?.startsWith('pasfoto') || packageItem?.name?.toLowerCase().includes('pas foto');
   const [selectedBranchId, setSelectedBranchId] = useState(isSelfPhoto ? 'prof-soedarto' : 'bq-square');
+  const [pasFotoSet, setPasFotoSet] = useState('Set A (4x6 = 4 lembar)');
+  const [pasFotoColor, setPasFotoColor] = useState('Warna');
   const [date, setDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('10:00 WIB');
   const [totalPeople, setTotalPeople] = useState('');
@@ -49,6 +52,8 @@ export default function BookingModal({ packageItem, onClose }) {
       customerName ? `Nama Pemesan: ${customerName}` : null,
       customerPhone ? `No. WhatsApp: ${customerPhone}` : null,
       `Paket: ${packageItem.name} (${packageItem.price}${packageItem.priceSuffix || ''})`,
+      isPasFoto ? `Pilihan Set Cetak: ${pasFotoSet}` : null,
+      isPasFoto ? `Opsi Warna: Cetak ${pasFotoColor}` : null,
       `Cabang: ${currentBranch.name}`,
       date ? `Rencana Tanggal: ${date}` : `Tanggal: (Menyesuaikan)`,
       `Jam yang Diinginkan: ${selectedTime}`,
@@ -193,6 +198,72 @@ export default function BookingModal({ packageItem, onClose }) {
               })}
             </div>
           </div>
+
+          {/* Pas Foto Specific: Set Cetak & Opsi Warna */}
+          {isPasFoto && (
+            <div className="p-3 bg-warm-50/90 rounded-2xl border border-warm-200 space-y-2.5">
+              <div>
+                <label className="block text-xs font-bold text-charcoal mb-1.5 flex items-center justify-between">
+                  <span>Pilihan Paket Set Cetak Pas Foto:</span>
+                  <span className="text-[10px] text-warm-800 font-bold">Bebas Pilih</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {[
+                    { code: 'Set A', detail: '4x6 = 4 lembar' },
+                    { code: 'Set B', detail: '4x6 = 2 lbr & 3x4 = 4 lbr' },
+                    { code: 'Set C', detail: '3x4 = 8 lembar' },
+                    { code: 'Set D', detail: '3x4 = 4 lbr & 2x3 = 8 lbr' }
+                  ].map((s) => {
+                    const val = `${s.code}: ${s.detail}`;
+                    const isSelected = pasFotoSet === val;
+                    return (
+                      <button
+                        type="button"
+                        key={s.code}
+                        onClick={() => setPasFotoSet(val)}
+                        className={`tap-bounce p-2 rounded-xl border text-left text-xs transition-all flex items-center justify-between ${
+                          isSelected
+                            ? 'bg-charcoal text-white border-charcoal font-bold shadow-xs'
+                            : 'bg-white text-charcoal border-warm-200 hover:bg-warm-100'
+                        }`}
+                      >
+                        <span className="font-bold">{s.code}</span>
+                        <span className={`text-[10.5px] ${isSelected ? 'text-warm-200' : 'text-charcoal-600'}`}>{s.detail}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-charcoal mb-1">
+                  Opsi Warna Cetak:
+                </label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    { label: '🌈 Cetak Berwarna', val: 'Warna' },
+                    { label: '⚪⚫ Hitam Putih (B/W)', val: 'Hitam Putih' }
+                  ].map((c) => {
+                    const isSelected = pasFotoColor === c.val;
+                    return (
+                      <button
+                        type="button"
+                        key={c.val}
+                        onClick={() => setPasFotoColor(c.val)}
+                        className={`tap-bounce p-2 rounded-xl border text-center text-xs transition-all font-bold ${
+                          isSelected
+                            ? 'bg-charcoal text-white border-charcoal shadow-xs'
+                            : 'bg-white text-charcoal border-warm-200 hover:bg-warm-100'
+                        }`}
+                      >
+                        {c.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 2. Date Picker */}
           <div>
