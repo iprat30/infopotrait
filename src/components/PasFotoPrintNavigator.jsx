@@ -275,7 +275,7 @@ const QUICK_PRESETS = [
 ];
 
 // ── MAIN COMPONENT ───────────────────────────────────────────────────────────
-export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
+export default function PasFotoPrintNavigator({ onOpenBookingModal, isEmbedded = false, onClose = null }) {
   // ── Mode state: 'easy' (new simplified UX) or 'advanced' (legacy set picker)
   const [mode, setMode] = useState('easy');
 
@@ -534,26 +534,43 @@ export default function PasFotoPrintNavigator({ onOpenBookingModal }) {
 
   return (
     <section
-      className="bg-white rounded-3xl p-4 sm:p-6 border-2 border-warm-300/80 shadow-soft space-y-5 my-2"
+      className={
+        isEmbedded
+          ? "space-y-4 pt-3 border-t border-warm-200 animate-fadeIn"
+          : "bg-white rounded-3xl p-4 sm:p-6 border-2 border-warm-300/80 shadow-soft space-y-5 my-2"
+      }
       aria-label="Kalkulator Cetak Pas Foto"
     >
       {/* ── HEADER ── */}
-      <div className="flex flex-col gap-2 border-b border-warm-100 pb-4">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 text-[10.5px] font-black px-2.5 py-1 rounded-full border border-amber-200">
-            <Printer className="size-3 text-amber-700" />
-            <span>Cetak Pas Foto – File Sendiri</span>
-          </span>
-          <span className="text-[10.5px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-            ✅ Harga Langsung Terhitung
-          </span>
+      <div className="flex flex-col gap-2 border-b border-warm-100 pb-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 text-[10.5px] font-black px-2.5 py-1 rounded-full border border-amber-200">
+              <Printer className="size-3 text-amber-700" />
+              <span>Cetak Pas Foto – File Sendiri</span>
+            </span>
+            <span className="text-[10.5px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              ✅ Hitung Otomatis Real-time
+            </span>
+          </div>
+
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="tap-bounce text-[11px] font-bold text-charcoal-700 hover:text-charcoal bg-warm-100 hover:bg-warm-200 px-2.5 py-1 rounded-lg border border-warm-200 transition-colors flex items-center gap-1"
+            >
+              <span>▲ Tutup Kalkulator</span>
+            </button>
+          )}
         </div>
+
         <div>
           <h3 className="text-base sm:text-lg font-black text-charcoal tracking-tight">
             Mau cetak berapa lembar ukuran apa?
           </h3>
           <p className="text-xs text-charcoal-600 mt-0.5 leading-relaxed">
-            Pilih ukuran, jumlah lembar, dan warna — sistem kami otomatis cari kombinasi terbaik & hitung total biaya. Praktis!
+            Pilih ukuran, jumlah lembar, dan warna — sistem kami otomatis cari kombinasi set terbaik & hitung total biaya. Praktis!
           </p>
         </div>
 

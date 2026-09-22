@@ -13,9 +13,9 @@ import FloatingCta from './components/FloatingCta';
 import BookingModal from './components/BookingModal';
 import PromoHookModal from './components/PromoHookModal';
 import PromoDetailModal from './components/PromoDetailModal';
-import PasFotoPrintNavigator from './components/PasFotoPrintNavigator';
 import { PACKAGES_DATA } from './data/packagesData';
-import { PlusCircle, CheckCircle2, Flame } from 'lucide-react';
+import { PlusCircle, CheckCircle2, Flame, Printer } from 'lucide-react';
+import { checkIsCetakRequested } from './utils/urlHelpers';
 
 // Categories that trigger faster promo reveal (high-intent visitors)
 const HIGH_INTENT_CATEGORIES = ['promo', 'wisuda-indoor', 'wisuda-outdoor', 'group'];
@@ -23,8 +23,12 @@ const DEFAULT_REVEAL_DELAY = 30_000;  // 30 sec for normal browsing
 const INTENT_REVEAL_DELAY  = 12_000;  // 12 sec for wisuda/family viewers
 
 export default function App() {
+  const isCetakInitial = checkIsCetakRequested();
   const [activeTab, setActiveTab] = useState('packages');
-  const [selectedCategory, setSelectedCategory] = useState('wisuda-indoor');
+  const [selectedCategory, setSelectedCategory] = useState(
+    isCetakInitial ? 'pasfoto' : 'wisuda-indoor'
+  );
+  const [isCetakAutoOpen, setIsCetakAutoOpen] = useState(isCetakInitial);
   const [bookingPackage, setBookingPackage] = useState(null);
   const [showAddOns, setShowAddOns] = useState(false);
 
@@ -70,6 +74,41 @@ export default function App() {
 
 
   const currentCategoryData = PACKAGES_DATA[selectedCategory];
+  const packagesSectionRef = useRef(null);
+
+  // Jika dibuka via subdomain atau link cetak, otomatis scroll ke paket cetak
+  useEffect(() => {
+    if (isCetakInitial) {
+      const timer = setTimeout(() => {
+        if (packagesSectionRef.current) {
+          packagesSectionRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        }
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isCetakInitial]);
+
+  const handleSelectCategory = (catId) => {
+    if (!catId) return;
+    if (activeTab !== 'packages') {
+      setActiveTab('packages');
+    }
+    setSelectedCategory(catId);
+    setShowAddOns(false);
+
+    // Bawa tampilan layar langsung ke paket yang tersedia secara smooth
+    setTimeout(() => {
+      if (packagesSectionRef.current) {
+        packagesSectionRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    }, 60);
+  };
 
   return (
     <div className="min-h-screen bg-warm-50 text-charcoal flex flex-col antialiased selection:bg-warm-200">
@@ -87,8 +126,7 @@ export default function App() {
           <PortfolioTicker
             onSelectCategory={(catId) => {
               if (catId && PACKAGES_DATA[catId]) {
-                setSelectedCategory(catId);
-                setShowAddOns(false);
+                handleSelectCategory(catId);
               }
             }}
           />
@@ -97,14 +135,15 @@ export default function App() {
           {/* Simple Category Tabs (All Visible at Once, No Photos) */}
           <CategoryTabs
             selectedCategory={selectedCategory}
-            onSelectCategory={(catId) => {
-              setSelectedCategory(catId);
-              setShowAddOns(false);
-            }}
+            onSelectCategory={handleSelectCategory}
           />
 
           {/* Package Content Area */}
-          <main className="flex-1 max-w-xl mx-auto px-4 py-2 w-full space-y-3">
+          <main
+            ref={packagesSectionRef}
+            id="packages-section"
+            className="flex-1 max-w-xl mx-auto px-4 py-2 w-full space-y-3 scroll-mt-3"
+          >
             
             {/* Category Description Banner */}
             {currentCategoryData && (
@@ -132,11 +171,22 @@ export default function App() {
             ) : (
               /* Standard Packages List (Clean Typography, No Photos on Cards, with Booking Hours) */
               <div className="space-y-3">
-                {/* Interactive Pas Foto Print Configurator & Calculator */}
-                {selectedCategory === 'pasfoto' && (
-                  <PasFotoPrintNavigator
-                    onOpenBookingModal={(pkg) => setBookingPackage(pkg)}
-                  />
+                {/* Banner Akses Langsung jika dibuka via Link / Subdomain Cetak */}
+                {selectedCategory === 'pasfoto' && isCetakInitial && (
+                  <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-300 text-xs shadow-soft flex items-center justify-between animate-fadeIn">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex size-2 shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full size-2 bg-amber-500"></span>
+                      </span>
+                      <span className="font-bold text-amber-950">
+                        Akses Langsung: Order Cetak Pas Foto (Kirim File via WA)
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-black text-emerald-800 bg-white px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                      Aktif
+                    </span>
+                  </div>
                 )}
 
                 {currentCategoryData?.items?.map((item) => (
@@ -144,6 +194,7 @@ export default function App() {
                     key={item.id}
                     item={item}
                     onOpenBookingModal={(pkg) => setBookingPackage(pkg)}
+                    isCetakAutoOpen={isCetakAutoOpen}
                   />
                 ))}
 
