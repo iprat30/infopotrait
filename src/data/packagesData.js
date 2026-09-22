@@ -148,6 +148,31 @@ export const PACKAGES_DATA = {
     description: "Sesi foto wisuda & keluarga di studio dengan pencahayaan profesional, ruang ber-AC, dan backdrop elegan",
     items: [
       {
+        id: "family-eksklusif",
+        name: "Family Graduation: Paket Eksklusif",
+        badge: "Sultan Premium",
+        badgeType: "luxury",
+        isPopular: false,
+        price: "Rp 1.200.000",
+        normalPrice: null,
+        capacity: "Hingga 10 Orang",
+        duration: "± 40 Menit",
+        outfits: "Bebas 3 outfit (wisudawan & keluarga)",
+        facilities: [
+          "Sesi lebih private & nyaman untuk keluarga besar hingga 10 orang",
+          "Wisudawan & keluarga bebas 3 outfit bergantian",
+          "Lebih banyak variasi pose dan konsep"
+        ],
+        deliverables: [
+          "6 file edit premium",
+          "4 cetak 10R+",
+          "1 cetak 12R+",
+          "1 cetak 20R+ (50x75 cm) + DOUBLE FRAME PREMIUM",
+          "Semua file sesi foto via Google Drive"
+        ],
+        note: "Hasil super megah siap pajang di ruang tamu"
+      },
+      {
         id: "family-favorit",
         name: "Family Graduation: Paket Favorit",
         badge: "Paling Direkomendasikan",
@@ -193,31 +218,6 @@ export const PACKAGES_DATA = {
           "File dikirim via WhatsApp"
         ],
         note: "Pilihan cepat & praktis untuk keluarga inti"
-      },
-      {
-        id: "family-eksklusif",
-        name: "Family Graduation: Paket Eksklusif",
-        badge: "Sultan Premium",
-        badgeType: "luxury",
-        isPopular: false,
-        price: "Rp 1.200.000",
-        normalPrice: null,
-        capacity: "Hingga 10 Orang",
-        duration: "± 40 Menit",
-        outfits: "Bebas 3 outfit (wisudawan & keluarga)",
-        facilities: [
-          "Sesi lebih private & nyaman untuk keluarga besar hingga 10 orang",
-          "Wisudawan & keluarga bebas 3 outfit bergantian",
-          "Lebih banyak variasi pose dan konsep"
-        ],
-        deliverables: [
-          "6 file edit premium",
-          "4 cetak 10R+",
-          "1 cetak 12R+",
-          "1 cetak 20R+ (50x75 cm) + DOUBLE FRAME PREMIUM",
-          "Semua file sesi foto via Google Drive"
-        ],
-        note: "Hasil super megah siap pajang di ruang tamu"
       }
     ],
     addOns: [
@@ -290,30 +290,48 @@ export const PACKAGES_DATA = {
     description: "Foto rapi standar instansi untuk Ijazah, CPNS, BUMN, Visa, Paspor, & Buku Nikah",
     items: [
       {
-        id: "cetak-pasfoto-only",
-        name: "Cetak Pas Foto Saja (File Sudah Ada)",
-        badge: "Kirim File via WA",
+        id: "photo-id-2",
+        name: "Photo ID Personal: ID 2 (3 Pose)",
+        badge: "Paling Direkomendasikan",
         badgeType: "recommended",
         isPopular: true,
-        isPrintOnly: true,
-        price: "Mulai Rp 8.000",
-        priceSuffix: " / set",
+        price: "Rp 120.000",
         normalPrice: null,
-        capacity: "File Milik Sendiri",
-        duration: "Express 30 Mnt / Reguler H+1",
-        outfits: "Siap Cetak",
+        capacity: "1 Orang",
+        duration: "20 Menit",
+        outfits: "1 Baju",
         facilities: [
-          "Khusus untuk Anda yang sudah memiliki file pas foto siap cetak",
-          "Proses mudah: Kirim file langsung via WhatsApp (Format Dokumen agar tajam)",
-          "Pilihan Cetak Kilat Express (± 30 menit) atau Reguler (H+1)",
-          "Kualitas cetak kertas foto lab doff premium standar instansi & tahan lama"
+          "3 variasi pilihan pose profesional",
+          "Pilihan Background: Merah atau Putih",
+          "3 file edit profesional"
         ],
         deliverables: [
-          "Bebas pilih Paket Set Cetak: Set A / Set B / Set C / Set D",
-          "Bebas pilih Cetak Berwarna atau Cetak Hitam Putih (B/W)",
-          "Bisa diambil di Cabang Tembalang (BQ Square / Soedarto) atau Sekaran UNNES"
+          "3 cetak 4R",
+          "3 file kirim via WhatsApp"
         ],
-        note: "Tarif Cetak: Reguler H+1 Rp 8.000 / set | Express 30 Menit Rp 10.000 / set"
+        note: "Paling direkomendasikan untuk portofolio CV, LinkedIn, dan karir"
+      },
+      {
+        id: "photo-id-1",
+        name: "Photo ID Personal: ID 1",
+        badge: "Personal",
+        badgeType: "default",
+        isPopular: false,
+        price: "Rp 50.000",
+        normalPrice: null,
+        capacity: "1 Orang",
+        duration: "10 Menit",
+        outfits: "1 Baju",
+        facilities: [
+          "1 pose, 1 baju",
+          "Pilihan Background: Merah atau Putih",
+          "1 file edit profesional"
+        ],
+        deliverables: [
+          "1 cetak 4R premium",
+          "1 file master kirim via WhatsApp"
+        ],
+        note: "Sangat bagus untuk profil CV atau kartu pengenal"
       },
       {
         id: "pasfoto-express",
@@ -338,28 +356,6 @@ export const PACKAGES_DATA = {
         note: "Estimasi ± 30 menit langsung jadi, siap dipakai daftar resmi"
       },
       {
-        id: "photo-id-2",
-        name: "Photo ID Personal: ID 2 (3 Pose)",
-        badge: "Paling Direkomendasikan",
-        badgeType: "recommended",
-        isPopular: true,
-        price: "Rp 120.000",
-        normalPrice: null,
-        capacity: "1 Orang",
-        duration: "20 Menit",
-        outfits: "1 Baju",
-        facilities: [
-          "3 variasi pilihan pose profesional",
-          "Pilihan Background: Merah atau Putih",
-          "3 file edit profesional"
-        ],
-        deliverables: [
-          "3 cetak 4R",
-          "3 file kirim via WhatsApp"
-        ],
-        note: "Paling direkomendasikan untuk portofolio CV, LinkedIn, dan karir"
-      },
-      {
         id: "pasfoto-reguler",
         name: "Pas Foto Bebas Jerawat: Reguler",
         badge: "Ekonomis",
@@ -382,26 +378,30 @@ export const PACKAGES_DATA = {
         note: "Hasil rapi dan jernih sesuai standar resmi"
       },
       {
-        id: "photo-id-1",
-        name: "Photo ID Personal: ID 1",
-        badge: "Personal",
-        badgeType: "default",
-        isPopular: false,
-        price: "Rp 50.000",
+        id: "cetak-pasfoto-only",
+        name: "Cetak Pas Foto Saja (File Sudah Ada)",
+        badge: "Kirim File via WA",
+        badgeType: "recommended",
+        isPopular: true,
+        isPrintOnly: true,
+        price: "Mulai Rp 8.000",
+        priceSuffix: " / set",
         normalPrice: null,
-        capacity: "1 Orang",
-        duration: "10 Menit",
-        outfits: "1 Baju",
+        capacity: "File Milik Sendiri",
+        duration: "Express 30 Mnt / Reguler H+1",
+        outfits: "Siap Cetak",
         facilities: [
-          "1 pose, 1 baju",
-          "Pilihan Background: Merah atau Putih",
-          "1 file edit profesional"
+          "Khusus untuk Anda yang sudah memiliki file pas foto siap cetak",
+          "Proses mudah: Kirim file langsung via WhatsApp (Format Dokumen agar tajam)",
+          "Pilihan Cetak Kilat Express (± 30 menit) atau Reguler (H+1)",
+          "Kualitas cetak kertas foto lab doff premium standar instansi & tahan lama"
         ],
         deliverables: [
-          "1 cetak 4R premium",
-          "1 file master kirim via WhatsApp"
+          "Bebas pilih Paket Set Cetak: Set A / Set B / Set C / Set D",
+          "Bebas pilih Cetak Berwarna atau Cetak Hitam Putih (B/W)",
+          "Bisa diambil di Cabang Tembalang (BQ Square / Soedarto) atau Sekaran UNNES"
         ],
-        note: "Sangat bagus untuk profil CV atau kartu pengenal"
+        note: "Tarif Cetak: Reguler H+1 Rp 8.000 / set | Express 30 Menit Rp 10.000 / set"
       }
     ],
     addOns: [

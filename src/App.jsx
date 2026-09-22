@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Header from './components/Header';
 import NavigationSwitcher from './components/NavigationSwitcher';
 import PortfolioTicker from './components/PortfolioTicker';
@@ -75,6 +75,16 @@ export default function App() {
 
   const currentCategoryData = PACKAGES_DATA[selectedCategory];
   const packagesSectionRef = useRef(null);
+
+  // Urutkan paket dari yang paling mahal berada di atas
+  const sortedCategoryItems = useMemo(() => {
+    if (!currentCategoryData?.items) return [];
+    return [...currentCategoryData.items].sort((a, b) => {
+      const priceA = parseInt((a.price || '').replace(/[^0-9]/g, ''), 10) || 0;
+      const priceB = parseInt((b.price || '').replace(/[^0-9]/g, ''), 10) || 0;
+      return priceB - priceA; // Paling mahal berada di atas
+    });
+  }, [currentCategoryData]);
 
   // Jika dibuka via subdomain atau link cetak, otomatis scroll ke paket cetak
   useEffect(() => {
@@ -189,7 +199,7 @@ export default function App() {
                   </div>
                 )}
 
-                {currentCategoryData?.items?.map((item) => (
+                {sortedCategoryItems.map((item) => (
                   <PackageCard
                     key={item.id}
                     item={item}
