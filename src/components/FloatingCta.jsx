@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, Sparkles, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
 import { MAIN_WHATSAPP } from '../data/branchesData';
+import { trackWhatsAppClick } from '../utils/analytics';
 
 export default function FloatingCta() {
   const [activeHintIndex, setActiveHintIndex] = useState(0);
@@ -52,6 +53,7 @@ export default function FloatingCta() {
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackWhatsAppClick({ source: 'floating_cta' })}
           className="group relative overflow-hidden flex items-center justify-between gap-3 bg-gradient-to-r from-emerald-500 via-wa to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-extrabold py-3 px-4 sm:px-5 rounded-2xl shadow-lg animate-cta-pulse tap-bounce transition-all"
           aria-label="Konsultasi & Booking Cepat via WhatsApp"
         >

@@ -6,6 +6,7 @@ import {
 import { MAIN_WHATSAPP } from '../data/branchesData';
 import PasFotoPrintNavigator from './PasFotoPrintNavigator';
 import { getCetakShareUrl } from '../utils/urlHelpers';
+import { trackWhatsAppClick } from '../utils/analytics';
 
 export default function PackageCard({
   item,
@@ -245,6 +246,11 @@ export default function PackageCard({
                 href={waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackWhatsAppClick({
+                  source: 'package_card_print',
+                  packageName: item.name,
+                  price: item.priceNumeric
+                })}
                 className="tap-bounce inline-flex items-center justify-center gap-1 bg-wa hover:bg-wa-hover text-white text-xs font-bold py-2 px-3 rounded-xl shadow-sm transition-colors min-h-[40px]"
                 aria-label="Tanya cetak pas foto via WhatsApp"
               >
@@ -271,6 +277,11 @@ export default function PackageCard({
                 href={waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackWhatsAppClick({
+                  source: 'package_card_direct',
+                  packageName: item.name,
+                  price: item.priceNumeric
+                })}
                 className="tap-bounce inline-flex items-center justify-center gap-1.5 bg-wa hover:bg-wa-hover text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow-sm transition-colors min-h-[40px]"
                 aria-label={`Pesan ${item.name} via WhatsApp`}
               >

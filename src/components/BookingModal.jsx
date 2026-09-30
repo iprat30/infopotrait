@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { X, Calendar, MapPin, MessageCircle, Clock, Check, Info, User, Phone, Plus, Minus, Trash2, Layers } from 'lucide-react';
 import { BRANCHES_DATA, MAIN_WHATSAPP } from '../data/branchesData';
 import { PAS_FOTO_SETS, SPEED_OPTIONS, computeSheetsBreakdown } from './PasFotoPrintNavigator';
+import { trackWhatsAppClick } from '../utils/analytics';
 
 export default function BookingModal({ packageItem, onClose }) {
   const [customerName, setCustomerName] = useState('');
@@ -158,6 +159,13 @@ export default function BookingModal({ packageItem, onClose }) {
         `Halo admin, apakah jadwal sesi foto pada jam tersebut masih tersedia? Terima kasih.`
       ].filter(Boolean).join('\n');
     }
+
+    trackWhatsAppClick({
+      source: isPrintOnly ? 'booking_modal_print' : 'booking_modal',
+      packageName: currentPkg?.name || 'Booking',
+      price: currentPkg?.priceNumeric || currentPkg?.price,
+      branch: currentBranch?.name
+    });
 
     const url = `https://wa.me/${MAIN_WHATSAPP.number}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');

@@ -27,9 +27,10 @@ export default function Header() {
         <div className="relative inline-block py-0.5">
           <h1 className="font-black text-2xl sm:text-3xl tracking-[0.24em] text-charcoal uppercase block leading-none">
             POTRAIT
+            <span className="sr-only"> - Studio Foto & Self Photo Semarang (Pricelist & Booking Resmi)</span>
           </h1>
           <p className="text-[10px] sm:text-[11px] font-extrabold tracking-[0.32em] uppercase text-warm-800 mt-1">
-            Digital Studio & Self Photo
+            Digital Studio & Self Photo Semarang
           </p>
         </div>
 
