@@ -111,6 +111,30 @@ export const PACKAGES_DATA = {
     description: "Penawaran harga terbaik dengan diskon terbatas minggu ini. Kuota terbatas, amankan slot Anda sekarang!",
     items: [
       {
+        id: "promo-sayang",
+        name: "Promo Couple: Sayang",
+        badge: "Hemat Rp 201.000",
+        badgeType: "bestseller",
+        isPopular: true,
+        price: "Rp 499.000",
+        normalPrice: "Rp 700.000",
+        capacity: "2 Orang (Couple)",
+        duration: "30x Shoots",
+        outfits: "2x Baju",
+        facilities: [
+          "30x shoot pemotretan terarah",
+          "5x edit foto gaya estetik",
+          "Bebas 2x ganti baju",
+          "GRATIS 2 paket pasfoto buku nikah"
+        ],
+        deliverables: [
+          "4x cetak 4R",
+          "1x cetak 16RSS + FRAME 16RSS",
+          "All File via Google Drive"
+        ],
+        note: "Diskon spesial pra-nikah / couple, sudah termasuk frame besar 16RSS & bonus pasfoto nikah!"
+      },
+      {
         id: "wisuda-hemat",
         name: "Wisuda Hemat (Family & Bestie)",
         badge: "Hemat Rp 76.000",
